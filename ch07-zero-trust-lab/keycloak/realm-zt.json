@@ -1,0 +1,31 @@
+{
+  "realm": "zt",
+  "enabled": true,
+  "accessTokenLifespan": 300,
+  "roles": { "realm": [ { "name": "employee" }, { "name": "partner" } ] },
+  "clients": [
+    {
+      "clientId": "zt-lab",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": true
+    }
+  ],
+  "users": [
+    {
+      "username": "kim", "enabled": true,
+      "firstName": "민수", "lastName": "김",
+      "email": "kim@example.com", "emailVerified": true,
+      "credentials": [ { "type": "password", "value": "Passw0rd!", "temporary": false } ],
+      "realmRoles": [ "employee" ]
+    },
+    {
+      "username": "lee", "enabled": true,
+      "firstName": "지은", "lastName": "이",
+      "email": "lee@partner.example.com", "emailVerified": true,
+      "credentials": [ { "type": "password", "value": "Passw0rd!", "temporary": false } ],
+      "realmRoles": [ "partner" ]
+    }
+  ]
+}

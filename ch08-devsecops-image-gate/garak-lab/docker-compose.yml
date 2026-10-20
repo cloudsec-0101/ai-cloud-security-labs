@@ -1,0 +1,13 @@
+# 8장 실습 2. 시험 대상 모델을 띄울 로컬 모델 서버(Ollama). 6장 실습 3과 같은 구성
+# garak은 이 서버의 모델에 공격 문장(probe)을 보내고, 답을 검사기(detector)로 판정한다.
+# 실행: docker compose up -d
+services:
+  ollama:
+    image: ollama/ollama:0.6.5            # 버전 고정
+    ports:
+      - "127.0.0.1:11434:11434"           # 내 PC에서만 접속
+    volumes:
+      - ollama-models:/root/.ollama       # 내려받은 모델 보관 (다시 받지 않아도 됨)
+    restart: unless-stopped
+volumes:
+  ollama-models: {}

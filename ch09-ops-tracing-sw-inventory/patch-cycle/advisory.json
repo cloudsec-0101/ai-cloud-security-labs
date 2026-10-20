@@ -1,0 +1,12 @@
+{
+  "id": "LAB-2026-0001",
+  "title": "주문 조회 서비스 관리 기능 인증 우회 (실습용 가상 취약점)",
+  "affected": ["1.0"],
+  "fixed": "1.1",
+  "exploited": true,
+  "workaround": {
+    "description": "패치 전까지 앞단 프록시에서 /admin/ 경로를 차단",
+    "nginx": "location /admin/ { return 403 \"blocked by workaround LAB-2026-0001\\n\"; }"
+  },
+  "check": "/admin/export 요청에 200이 오면 취약"
+}

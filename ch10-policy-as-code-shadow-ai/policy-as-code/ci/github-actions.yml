@@ -1,0 +1,19 @@
+# 예시: 등록 파일이나 정책이 바뀌는 Pull Request마다 정책을 검사합니다.
+# 저장소의 .github/workflows/ 아래에 두면 동작합니다. 위반이 있으면 병합할 수 없게 브랜치 보호 규칙에서 필수 검사로 지정합니다.
+# 이렇게 하면 "등록 파일을 고쳐 승인 없이 운영으로 바꾸는 일"이 검사를 통과하지 못해 반영되지 않습니다.
+name: ai-asset-policy
+on:
+  pull_request:
+    paths: ["registry/**", "policy/**"]   # 이 두 폴더가 바뀐 PR에서만 실행
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4          # 저장소 내려받기
+      - uses: open-policy-agent/setup-opa@v2   # opa 명령 설치
+        with:
+          version: 1.0.0                   # 로컬 실습(check.sh)과 같은 버전으로 고정
+      - name: 정책 자체의 테스트             # 정책을 고친 PR이 정책을 망가뜨리지 않았는지 먼저 확인
+        run: opa test policy/ -v
+      - name: 등록 파일 검사                 # 위반이 있으면 check.sh가 종료 코드 1 → 이 검사가 실패로 표시됨
+        run: ./check.sh

@@ -1,0 +1,36 @@
+# 2장 실습: bad-pod.yaml의 위험 설정을 하나씩 걷어 낸 안전한 Pod
+# 원칙은 "필요한 것만 주고, 나머지는 기본으로 막는다(최소 권한)"이다.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: good-pod
+spec:
+  automountServiceAccountToken: false   # 필요 없으면 API 토큰을 넣지 않음
+                                        # (토큰이 있으면 컨테이너를 장악한 공격자가 Kubernetes API를 부를 수 있다)
+  # hostNetwork·hostPID를 쓰지 않는다 → 기본값(false)으로 노드와 분리된다
+  securityContext:                      # Pod 전체에 적용되는 보안 설정
+    runAsNonRoot: true                  # root(UID 0)로는 시작하지 못하게 막는다
+    runAsUser: 101                       # nginx 사용자
+    seccompProfile:
+      type: RuntimeDefault               # 위험한 시스템 호출 차단
+  containers:
+  - name: app
+    image: nginxinc/nginx-unprivileged:1.27-alpine   # 버전 고정, 비root용 이미지
+    ports:
+    - containerPort: 8080               # 비root는 1024 미만 포트를 열 수 없어 8080을 쓴다
+    securityContext:                    # 이 컨테이너에만 적용되는 보안 설정
+      privileged: false                 # 특권 모드 끔
+      allowPrivilegeEscalation: false   # 실행 중 권한 상승 금지
+      readOnlyRootFilesystem: true      # 컨테이너 파일시스템을 읽기 전용으로 → 악성 파일을 심기 어렵다
+      capabilities:
+        drop: ["ALL"]                    # 모든 커널 권한 제거
+    resources:
+      limits:                           # 자원 상한: 한 컨테이너가 노드 자원을 다 쓰는 것(DoS)을 막는다
+        cpu: "250m"                     # CPU 0.25개
+        memory: "128Mi"
+    volumeMounts:
+    - name: tmp
+      mountPath: /tmp                    # 쓰기가 필요한 곳만 별도 제공
+  volumes:
+  - name: tmp
+    emptyDir: {}                        # Pod가 지워지면 함께 사라지는 임시 공간(노드 디스크와 분리)

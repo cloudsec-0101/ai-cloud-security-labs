@@ -1,0 +1,8 @@
+name_regex,min_version,reason
+^curl$,8.5.0-2ubuntu10.16,Ubuntu 보안 업데이트(noble-security) 반영 버전
+^libc6$,2.39-0ubuntu8.9,Ubuntu 보안 업데이트(noble-security) 반영 버전
+^openssh-server$,1:9.6p1-3ubuntu13.14,OpenSSH 보안 업데이트 기준 버전(예시)
+^7-Zip,24.09,CVE-2025-0411(Mark-of-the-Web 우회) 수정 버전
+^Microsoft Visual Studio Code,1.142.0,사내 표준 버전(예시)
+^org.apache.tomcat:tomcat-catalina$,9.0.99,CVE-2025-24813(CISA KEV) 수정 버전
+^urllib3$,1.26.19,CVE-2024-37891 수정 버전

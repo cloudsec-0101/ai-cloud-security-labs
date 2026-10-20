@@ -1,0 +1,6 @@
+{
+  "summarizer": {
+    "primary":  {"provider": "공급자 1", "base_url": "http://127.0.0.1:11434/v1", "model": "qwen2.5:0.5b"},
+    "fallback": {"provider": "공급자 2", "base_url": "http://127.0.0.1:11434/v1", "model": "llama3.2:1b"}
+  }
+}

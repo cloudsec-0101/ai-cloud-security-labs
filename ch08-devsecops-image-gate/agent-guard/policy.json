@@ -1,0 +1,15 @@
+{
+  "task": "회의록 요약 후 팀장에게 보내기",
+  "allowed_tools": ["read_file", "write_file", "send_mail"],
+  "tools": {
+    "read_file":  {"risk": "낮음", "args": {"path": "str"}},
+    "write_file": {"risk": "중간", "args": {"path": "str", "content": "str"}},
+    "send_mail":  {"risk": "중간", "args": {"to": "list", "subject": "str", "body": "str"}},
+    "delete_file":{"risk": "높음", "args": {"path": "str"}},
+    "db_query":   {"risk": "중간", "args": {"sql": "str"}}
+  },
+  "workspace": "workspace/",
+  "mail_domain": "hanbit.example",
+  "approval_needed": {"send_mail_recipients_over": 5},
+  "limits": {"max_calls": 12, "max_same_call": 3}
+}

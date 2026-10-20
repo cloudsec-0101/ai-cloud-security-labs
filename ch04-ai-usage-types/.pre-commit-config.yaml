@@ -1,0 +1,9 @@
+# pre-commit 훅 예시: .pre-commit-config.yaml
+# git commit을 할 때마다 gitleaks가 바뀐 파일을 검사해, API 키·비밀번호 같은 비밀정보가 있으면 커밋을 막는다.
+# 설치: pip install pre-commit → 저장소 맨 위에 이 파일을 두고 → pre-commit install
+# 한 번 저장소에 올라간 키는 지워도 기록(히스토리)에 남으므로, 올리기 "전에" 막는 것이 핵심이다.
+repos:
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.24.0        # 사용하는 시점의 검증된 버전으로 고정
+    hooks:
+      - id: gitleaks    # gitleaks 저장소가 제공하는 훅 이름

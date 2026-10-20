@@ -1,0 +1,14 @@
+# 6장 실습 3. 두 "공급자" 역할을 할 로컬 모델 서버(Ollama)
+# Ollama 하나에 모델 두 개를 내려받아, routes.json에서 각각 "공급자 1", "공급자 2"인 것처럼 쓴다.
+# Ollama는 OpenAI 호환 API(http://127.0.0.1:11434/v1)를 제공하므로 gateway.py가 그대로 부를 수 있다.
+# 실행: docker compose up -d
+services:
+  ollama:
+    image: ollama/ollama:0.6.5            # 버전 고정
+    ports:
+      - "127.0.0.1:11434:11434"           # 내 PC에서만 접속
+    volumes:
+      - ollama-models:/root/.ollama       # 내려받은 모델을 보관 (컨테이너를 지워도 다시 받지 않아도 됨)
+    restart: unless-stopped               # PC를 다시 켜도 자동으로 다시 시작
+volumes:
+  ollama-models: {}

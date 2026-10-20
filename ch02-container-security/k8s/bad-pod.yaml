@@ -1,0 +1,32 @@
+# 2장 실습: 일부러 위험하게 만든 Pod (실제 클러스터에 배포하지 말 것)
+# 아래 ①~⑦은 모두 "컨테이너 탈출"이나 "노드 장악"으로 이어질 수 있는 설정이다.
+# good-pod.yaml과 한 줄씩 비교해 보고, kube-score·Trivy 같은 점검 도구가 무엇을 잡아내는지 확인한다.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: bad-pod
+spec:
+  hostNetwork: true            # ① 노드의 네트워크를 그대로 사용
+                               #    → 노드에서만 열려 있어야 할 포트(kubelet 등)에 컨테이너가 바로 접근할 수 있다
+  hostPID: true                # ② 노드의 모든 프로세스가 보임
+                               #    → 다른 컨테이너·노드 프로세스의 정보를 엿보거나 신호를 보낼 수 있다
+  containers:
+  - name: app
+    image: nginx:latest        # ③ 버전이 고정되지 않은 이미지
+                               #    → 배포할 때마다 다른 이미지가 올 수 있어, 무엇이 실행 중인지 추적하기 어렵다
+    securityContext:
+      privileged: true         # ④ 노드의 거의 모든 권한을 가짐
+                               #    → 컨테이너 격리가 사실상 꺼진 상태. 가장 먼저 금지해야 할 설정
+      runAsUser: 0             # ⑤ root로 실행
+      allowPrivilegeEscalation: true   # 실행 중에 더 높은 권한을 얻는 것(setuid 등)을 허용
+      capabilities:
+        add: ["SYS_ADMIN"]     # ⑥ 강력한 커널 권한 추가
+                               #    → 파일시스템 마운트 등이 가능해 탈출 기법에 자주 쓰인다
+    volumeMounts:
+    - name: host-root
+      mountPath: /host         # 노드의 루트(/)가 컨테이너 안의 /host로 보인다
+  volumes:
+  - name: host-root
+    hostPath:
+      path: /                  # ⑦ 노드의 루트 파일시스템 전체를 마운트
+                               #    → /host/etc/shadow, /host/root/.ssh 처럼 노드의 파일을 읽고 고칠 수 있다

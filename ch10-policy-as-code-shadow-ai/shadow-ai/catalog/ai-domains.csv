@@ -1,0 +1,15 @@
+domain,service,category
+chatgpt.com,ChatGPT,생성형 AI
+chat.openai.com,ChatGPT,생성형 AI
+claude.ai,Claude,생성형 AI
+gemini.google.com,Gemini,생성형 AI
+copilot.microsoft.com,Microsoft Copilot,생성형 AI
+m365.cloud.microsoft,Microsoft 365 Copilot,생성형 AI
+chat.deepseek.com,DeepSeek,생성형 AI
+perplexity.ai,Perplexity,AI 검색
+deepl.com,DeepL,번역
+gamma.app,Gamma,문서·발표 생성
+api.openai.com,OpenAI API,AI API
+api.anthropic.com,Anthropic API,AI API
+generativelanguage.googleapis.com,Gemini API,AI API
+huggingface.co,Hugging Face,모델 저장소

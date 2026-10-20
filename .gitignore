@@ -1,0 +1,16 @@
+# 실습 실행 중 생기는 파일
+__pycache__/
+*.pyc
+.venv/
+logs/*.jsonl
+inventories/*.json
+inventory-all.csv
+scan-*.json
+sbom-*.json
+gate-*.txt
+gateway-log.jsonl
+*.log
+# 비밀정보
+.env
+*.pem
+*.key

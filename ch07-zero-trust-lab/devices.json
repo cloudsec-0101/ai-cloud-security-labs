@@ -1,0 +1,4 @@
+{
+  "LAPTOP-KIM-01": { "owner": "kim", "managed": true,  "edr": true,  "patched": true  },
+  "LAPTOP-LEE-01": { "owner": "lee", "managed": true,  "edr": true,  "patched": false }
+}

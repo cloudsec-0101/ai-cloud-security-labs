@@ -1,0 +1,27 @@
+# 5장 실습 3. Agent 실행 환경의 Egress를 허용 목록 프록시로 제한
+# 구성: agent 컨테이너는 인터넷과 끊긴 내부망(agent-net)에만 연결되고,
+#       밖으로 나가는 길은 egress-proxy 하나뿐이다. 프록시는 squid.conf의 허용 목록만 통과시킨다.
+#   agent ──(agent-net, 내부 전용)──▶ egress-proxy ──(outside)──▶ 인터넷(허용 도메인만)
+# 실행: docker compose up -d
+# 확인 방법은 README의 실습 3 (허용 도메인은 응답이 오고, 그 밖의 도메인은 프록시가 403으로 막는다)
+networks:
+  agent-net:
+    internal: true          # 이 네트워크에서는 인터넷으로 직접 나갈 수 없음
+  outside: {}               # 일반 네트워크: 프록시만 이쪽에 연결되어 인터넷으로 나간다
+
+services:
+  egress-proxy:
+    image: alpine:3.20
+    # 컨테이너가 시작될 때 squid를 설치하고 포그라운드(-N)로 실행한다
+    command: sh -c "apk add --no-cache squid >/dev/null && squid -N -f /etc/squid/squid.conf"
+    volumes:
+      - ./squid.conf:/etc/squid/squid.conf:ro   # 허용 목록 설정 파일 (:ro = 읽기 전용으로 연결)
+    networks: [agent-net, outside]              # 두 네트워크에 모두 연결된 유일한 컨테이너
+
+  agent:
+    image: curlimages/curl:8.10.1   # Agent 역할: curl로 바깥에 요청을 보내 본다
+    command: sleep infinity         # 계속 켜 두고 exec로 들어가 명령을 실행한다
+    environment:
+      HTTPS_PROXY: http://egress-proxy:3128   # 모든 HTTPS 요청을 프록시로 보내도록 지정
+    networks: [agent-net]   # 프록시만 보이는 내부 네트워크에만 연결
+    depends_on: [egress-proxy]      # 프록시가 먼저 뜬 뒤에 시작

@@ -1,0 +1,114 @@
+# 가상 조직(직원 500명 제조기업)의 AI 자산 등록 파일
+# 이 파일이 AI 자산의 허용 목록입니다. 정책 검사(check.sh)와 Shadow AI 대조(실습 2)가 함께 읽습니다.
+#
+# data: 이 자산이 무엇을 다루고 무엇을 할 수 있는가 (기준 등급을 정하는 근거, 표 10-4)
+#   external_send            회사 밖으로 데이터를 보낸다 (메일 발송, 외부 API 호출)
+#   executes_changes         실제 변경을 실행한다 (결제, 발주, 배포, 저장소 반영)
+#   personal_or_confidential 개인정보나 기밀을 다룬다
+#   internet_exposed         인터넷에 노출된다
+#   internal_read            사내 데이터를 조회한다
+# controls: 승인과 점검 기록
+#   approved_by              승인한 곳 (보안위원회, 보안팀, 부서장, 등록만)
+#   security_test            배포 전 보안 테스트 결과 (AI SaaS는 도입 전 설정 점검)
+#   agent_scenario_test      Agent 시나리오 테스트 결과
+#   last_review              마지막 위험평가일
+
+assets:
+  - id: AI-001
+    name: 기업용 생성형 AI
+    type: 생성형 AI
+    status: 운영
+    owner_dept: 정보전략팀
+    accountable: 김정보
+    declared_grade: 높음
+    domains: [chatgpt.com, chat.openai.com]
+    account: 기업 계정
+    data: {personal_or_confidential: true}
+    controls: {approved_by: 보안팀, security_test: 통과, last_review: "2026-06-10"}
+
+  - id: AI-002
+    name: 업무용 Copilot
+    type: 생성형 AI
+    status: 운영
+    owner_dept: 정보전략팀
+    accountable: 김정보
+    declared_grade: 높음
+    domains: [copilot.microsoft.com, m365.cloud.microsoft]
+    account: 기업 계정
+    data: {personal_or_confidential: true}
+    controls: {approved_by: 보안팀, security_test: 통과, last_review: "2026-03-02"}
+
+  - id: AI-003
+    name: 고객 상담 챗봇
+    type: AI 서비스
+    status: 운영
+    owner_dept: 고객지원팀
+    accountable: 이상담
+    declared_grade: 높음
+    app_id: cs-chatbot
+    data: {personal_or_confidential: true, internet_exposed: true, internal_read: true}
+    controls: {approved_by: 보안팀, security_test: 통과, last_review: "2026-08-20"}
+
+  - id: AI-004
+    name: 구매 자동화 Agent
+    type: Agent
+    status: 운영
+    owner_dept: 구매팀
+    accountable: 박구매
+    declared_grade: 높음
+    agent_id: AGT-purchase
+    tools: [MCP-ERP, MCP-MAIL]
+    data: {external_send: true, executes_changes: true, internal_read: true}
+    controls: {approved_by: 보안팀, security_test: 통과, human_approval: true, kill_switch: false, last_review: "2026-09-15"}
+
+  - id: AI-005
+    name: 개발팀 코딩 Agent
+    type: Agent
+    status: 운영
+    owner_dept: 개발팀
+    accountable: 최개발
+    declared_grade: 매우 높음
+    agent_id: AGT-coding
+    tools: [MCP-GIT, MCP-WEBFETCH]
+    data: {executes_changes: true, internal_read: true}
+    controls: {approved_by: 보안위원회, security_test: 통과, agent_scenario_test: 통과, human_approval: true, kill_switch: true, last_review: "2026-08-01"}
+
+  - id: AI-006
+    name: 영업 보고서 요약 앱
+    type: 현업 앱
+    status: 운영
+    owner_dept: 영업팀
+    accountable: ""
+    declared_grade: 중간
+    app_id: sales-summary
+    data: {personal_or_confidential: true, internal_read: true}
+    controls: {approved_by: 부서장, last_review: "2026-09-01"}
+
+  - id: AI-007
+    name: 사내 문서 검색 AI
+    type: AI 서비스
+    status: 운영
+    owner_dept: 정보전략팀
+    accountable: 김정보
+    declared_grade: 중간
+    app_id: doc-search
+    data: {internal_read: true}
+    controls: {approved_by: 부서장, last_review: "2025-09-01"}
+
+  - id: AI-008
+    name: 번역 보조 AI
+    type: 생성형 AI
+    status: 운영
+    owner_dept: 해외영업팀
+    accountable: 정해외
+    declared_grade: 낮음
+    domains: [deepl.com]
+    account: 기업 계정
+    data: {}
+    controls: {approved_by: 등록만, last_review: "2026-05-11"}
+
+# Agent가 쓸 수 있는 MCP Server (10-3의 허용 목록)
+mcp_servers:
+  - {id: MCP-ERP, host: mcp-erp.corp.example, owner_dept: 구매팀, status: 승인}
+  - {id: MCP-MAIL, host: mcp-mail.corp.example, owner_dept: 정보전략팀, status: 승인}
+  - {id: MCP-GIT, host: mcp-git.corp.example, owner_dept: 개발팀, status: 승인}
