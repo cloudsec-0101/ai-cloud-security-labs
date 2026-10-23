@@ -17,6 +17,8 @@
 - `services/detector.py`
 - `services/pep.py`
 - `try.sh`
+- `ch07_lab2_mini_zero_trust.ipynb`: 실습 2를 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함)
+- `ch07_lab3_rag_document_acl.ipynb`: 실습 3을 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함)
 
 ---
 

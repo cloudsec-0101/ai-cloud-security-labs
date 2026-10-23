@@ -5,6 +5,7 @@
 ## 이 폴더의 파일
 
 - `.pre-commit-config.yaml`
+- `ch04_lab3_gitleaks_api_key.ipynb`: 실습 3을 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함)
 
 ---
 

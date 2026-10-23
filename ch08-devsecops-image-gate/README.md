@@ -16,6 +16,9 @@
 - `agent-guard/policy.json`
 - `agent-guard/requests.json`
 - `agent-guard/runner.py`
+- `ch08_lab1_image_cve_gate.ipynb`: 실습 1을 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함)
+- `ch08_lab2_garak_jailbreak_rate.ipynb`: 실습 2를 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함)
+- `ch08_lab3_agent_tool_guard.ipynb`: 실습 3을 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함)
 
 ---
 
