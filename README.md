@@ -19,32 +19,32 @@
 
 ## Jupyter 노트북
 
-코드 실습은 README의 단계를 Jupyter 노트북에서 셀 단위로 실행하는 버전도 있습니다. 노트북마다 학습 목표, 단계별 설명, 실행 결과, 체크포인트와 과제(힌트 포함)가 들어 있고, 저장된 출력은 2026년 10월 23일 WSL2의 Ubuntu 24.04에서 실제로 실행한 결과입니다.
+코드 실습은 README의 단계를 Jupyter 노트북에서 셀 단위로 실행하는 버전도 있습니다. 노트북마다 직접 실행할 버전(출력 없음)과 실행 결과가 저장된 버전(`_executed`) 두 개를 둡니다. 노트북마다 학습 목표, 단계별 설명, 실행 결과, 체크포인트와 과제(힌트 포함)가 들어 있고, `_executed` 버전에 저장된 출력은 2026년 10월 23일 WSL2의 Ubuntu 24.04에서 실제로 실행한 결과입니다.
 
 - 실행 환경: WSL2의 Ubuntu 24.04 + Docker. 노트북의 `%%bash` 셀은 리눅스 명령으로 실행됩니다.
 - 준비: `python3 -m venv ~/.venv-lab && ~/.venv-lab/bin/pip install jupyterlab` 뒤, 노트북이 있는 장 폴더에서 `~/.venv-lab/bin/jupyter lab`을 실행합니다. VS Code라면 WSL 확장으로 폴더를 열고 `~/.venv-lab`의 Python을 커널로 고릅니다.
 - 노트북은 실습 파일을 홈 디렉터리의 작업 폴더로 복사해 실행하므로, 저장소의 원본 파일은 바뀌지 않습니다.
 
-| 장 | 노트북 |
-|---|---|
-| 2장 | [ch02_lab1_container_isolation.ipynb](./ch02-container-security/ch02_lab1_container_isolation.ipynb) |
-| 4장 | [ch04_lab3_gitleaks_api_key.ipynb](./ch04-ai-usage-types/ch04_lab3_gitleaks_api_key.ipynb) |
-| 5장 | [ch05_lab1_mcp_least_privilege.ipynb](./ch05-agent-mcp-security/ch05_lab1_mcp_least_privilege.ipynb) |
-| 5장 | [ch05_lab2_indirect_prompt_injection.ipynb](./ch05-agent-mcp-security/ch05_lab2_indirect_prompt_injection.ipynb) |
-| 5장 | [ch05_lab3_egress_allowlist.ipynb](./ch05-agent-mcp-security/ch05_lab3_egress_allowlist.ipynb) |
-| 6장 | [ch06_lab2_pseudonymization_checkpoint.ipynb](./ch06-aiaas-vendor-evaluation/ch06_lab2_pseudonymization_checkpoint.ipynb) |
-| 6장 | [ch06_lab3_exit_rehearsal.ipynb](./ch06-aiaas-vendor-evaluation/ch06_lab3_exit_rehearsal.ipynb) |
-| 7장 | [ch07_lab2_mini_zero_trust.ipynb](./ch07-zero-trust-lab/ch07_lab2_mini_zero_trust.ipynb) |
-| 7장 | [ch07_lab3_rag_document_acl.ipynb](./ch07-zero-trust-lab/ch07_lab3_rag_document_acl.ipynb) |
-| 8장 | [ch08_lab1_image_cve_gate.ipynb](./ch08-devsecops-image-gate/ch08_lab1_image_cve_gate.ipynb) |
-| 8장 | [ch08_lab2_garak_jailbreak_rate.ipynb](./ch08-devsecops-image-gate/ch08_lab2_garak_jailbreak_rate.ipynb) |
-| 8장 | [ch08_lab3_agent_tool_guard.ipynb](./ch08-devsecops-image-gate/ch08_lab3_agent_tool_guard.ipynb) |
-| 9장 | [ch09_lab1_sw_inventory.ipynb](./ch09-ops-tracing-sw-inventory/ch09_lab1_sw_inventory.ipynb) |
-| 9장 | [ch09_lab2_trace_id_masking.ipynb](./ch09-ops-tracing-sw-inventory/ch09_lab2_trace_id_masking.ipynb) |
-| 9장 | [ch09_lab3_cloud_eol_check.ipynb](./ch09-ops-tracing-sw-inventory/ch09_lab3_cloud_eol_check.ipynb) |
-| 9장 | [ch09_lab4_patch_verify_workaround.ipynb](./ch09-ops-tracing-sw-inventory/ch09_lab4_patch_verify_workaround.ipynb) |
-| 10장 | [ch10_lab1_policy_as_code.ipynb](./ch10-policy-as-code-shadow-ai/ch10_lab1_policy_as_code.ipynb) |
-| 10장 | [ch10_lab2_shadow_ai.ipynb](./ch10-policy-as-code-shadow-ai/ch10_lab2_shadow_ai.ipynb) |
+| 장 | 노트북(직접 실행) | 실행 결과 포함 |
+|---|---|---|
+| 2장 | [ch02_lab1_container_isolation.ipynb](./ch02-container-security/ch02_lab1_container_isolation.ipynb) | [ch02_lab1_container_isolation_executed.ipynb](./ch02-container-security/ch02_lab1_container_isolation_executed.ipynb) |
+| 4장 | [ch04_lab3_gitleaks_api_key.ipynb](./ch04-ai-usage-types/ch04_lab3_gitleaks_api_key.ipynb) | [ch04_lab3_gitleaks_api_key_executed.ipynb](./ch04-ai-usage-types/ch04_lab3_gitleaks_api_key_executed.ipynb) |
+| 5장 | [ch05_lab1_mcp_least_privilege.ipynb](./ch05-agent-mcp-security/ch05_lab1_mcp_least_privilege.ipynb) | [ch05_lab1_mcp_least_privilege_executed.ipynb](./ch05-agent-mcp-security/ch05_lab1_mcp_least_privilege_executed.ipynb) |
+| 5장 | [ch05_lab2_indirect_prompt_injection.ipynb](./ch05-agent-mcp-security/ch05_lab2_indirect_prompt_injection.ipynb) | [ch05_lab2_indirect_prompt_injection_executed.ipynb](./ch05-agent-mcp-security/ch05_lab2_indirect_prompt_injection_executed.ipynb) |
+| 5장 | [ch05_lab3_egress_allowlist.ipynb](./ch05-agent-mcp-security/ch05_lab3_egress_allowlist.ipynb) | [ch05_lab3_egress_allowlist_executed.ipynb](./ch05-agent-mcp-security/ch05_lab3_egress_allowlist_executed.ipynb) |
+| 6장 | [ch06_lab2_pseudonymization_checkpoint.ipynb](./ch06-aiaas-vendor-evaluation/ch06_lab2_pseudonymization_checkpoint.ipynb) | [ch06_lab2_pseudonymization_checkpoint_executed.ipynb](./ch06-aiaas-vendor-evaluation/ch06_lab2_pseudonymization_checkpoint_executed.ipynb) |
+| 6장 | [ch06_lab3_exit_rehearsal.ipynb](./ch06-aiaas-vendor-evaluation/ch06_lab3_exit_rehearsal.ipynb) | [ch06_lab3_exit_rehearsal_executed.ipynb](./ch06-aiaas-vendor-evaluation/ch06_lab3_exit_rehearsal_executed.ipynb) |
+| 7장 | [ch07_lab2_mini_zero_trust.ipynb](./ch07-zero-trust-lab/ch07_lab2_mini_zero_trust.ipynb) | [ch07_lab2_mini_zero_trust_executed.ipynb](./ch07-zero-trust-lab/ch07_lab2_mini_zero_trust_executed.ipynb) |
+| 7장 | [ch07_lab3_rag_document_acl.ipynb](./ch07-zero-trust-lab/ch07_lab3_rag_document_acl.ipynb) | [ch07_lab3_rag_document_acl_executed.ipynb](./ch07-zero-trust-lab/ch07_lab3_rag_document_acl_executed.ipynb) |
+| 8장 | [ch08_lab1_image_cve_gate.ipynb](./ch08-devsecops-image-gate/ch08_lab1_image_cve_gate.ipynb) | [ch08_lab1_image_cve_gate_executed.ipynb](./ch08-devsecops-image-gate/ch08_lab1_image_cve_gate_executed.ipynb) |
+| 8장 | [ch08_lab2_garak_jailbreak_rate.ipynb](./ch08-devsecops-image-gate/ch08_lab2_garak_jailbreak_rate.ipynb) | [ch08_lab2_garak_jailbreak_rate_executed.ipynb](./ch08-devsecops-image-gate/ch08_lab2_garak_jailbreak_rate_executed.ipynb) |
+| 8장 | [ch08_lab3_agent_tool_guard.ipynb](./ch08-devsecops-image-gate/ch08_lab3_agent_tool_guard.ipynb) | [ch08_lab3_agent_tool_guard_executed.ipynb](./ch08-devsecops-image-gate/ch08_lab3_agent_tool_guard_executed.ipynb) |
+| 9장 | [ch09_lab1_sw_inventory.ipynb](./ch09-ops-tracing-sw-inventory/ch09_lab1_sw_inventory.ipynb) | [ch09_lab1_sw_inventory_executed.ipynb](./ch09-ops-tracing-sw-inventory/ch09_lab1_sw_inventory_executed.ipynb) |
+| 9장 | [ch09_lab2_trace_id_masking.ipynb](./ch09-ops-tracing-sw-inventory/ch09_lab2_trace_id_masking.ipynb) | [ch09_lab2_trace_id_masking_executed.ipynb](./ch09-ops-tracing-sw-inventory/ch09_lab2_trace_id_masking_executed.ipynb) |
+| 9장 | [ch09_lab3_cloud_eol_check.ipynb](./ch09-ops-tracing-sw-inventory/ch09_lab3_cloud_eol_check.ipynb) | [ch09_lab3_cloud_eol_check_executed.ipynb](./ch09-ops-tracing-sw-inventory/ch09_lab3_cloud_eol_check_executed.ipynb) |
+| 9장 | [ch09_lab4_patch_verify_workaround.ipynb](./ch09-ops-tracing-sw-inventory/ch09_lab4_patch_verify_workaround.ipynb) | [ch09_lab4_patch_verify_workaround_executed.ipynb](./ch09-ops-tracing-sw-inventory/ch09_lab4_patch_verify_workaround_executed.ipynb) |
+| 10장 | [ch10_lab1_policy_as_code.ipynb](./ch10-policy-as-code-shadow-ai/ch10_lab1_policy_as_code.ipynb) | [ch10_lab1_policy_as_code_executed.ipynb](./ch10-policy-as-code-shadow-ai/ch10_lab1_policy_as_code_executed.ipynb) |
+| 10장 | [ch10_lab2_shadow_ai.ipynb](./ch10-policy-as-code-shadow-ai/ch10_lab2_shadow_ai.ipynb) | [ch10_lab2_shadow_ai_executed.ipynb](./ch10-policy-as-code-shadow-ai/ch10_lab2_shadow_ai_executed.ipynb) |
 
 ## 실습 환경
 

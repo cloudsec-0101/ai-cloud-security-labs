@@ -29,8 +29,8 @@ python3 -c "import yaml; print('PyYAML', yaml.__version__)"
 ```
 
 아래 결과는 2026년 10월 20일 WSL2의 Ubuntu 24.04, Docker 29.1, OPA 1.0.0, Python 3.12에서 실행한 것입니다. 실습의 조직, 사람, 로그는 모두 가상입니다.
-- `ch10_lab1_policy_as_code.ipynb`: 실습 1을 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함)
-- `ch10_lab2_shadow_ai.ipynb`: 실습 2를 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함)
+- `ch10_lab1_policy_as_code.ipynb`: 실습 1을 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함, 출력 없음). 실행 결과가 저장된 버전은 `ch10_lab1_policy_as_code_executed.ipynb`
+- `ch10_lab2_shadow_ai.ipynb`: 실습 2를 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함, 출력 없음). 실행 결과가 저장된 버전은 `ch10_lab2_shadow_ai_executed.ipynb`
 
 ---
 

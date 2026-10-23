@@ -6,7 +6,7 @@
 
 - `k8s/bad-pod.yaml`
 - `k8s/good-pod.yaml`
-- `ch02_lab1_container_isolation.ipynb`: 실습 1을 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함)
+- `ch02_lab1_container_isolation.ipynb`: 실습 1을 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함, 출력 없음). 실행 결과가 저장된 버전은 `ch02_lab1_container_isolation_executed.ipynb`
 
 ---
 

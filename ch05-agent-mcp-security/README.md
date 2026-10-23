@@ -12,9 +12,9 @@
 - `sanitize.py`
 - `egress/docker-compose.yml`
 - `egress/squid.conf`
-- `ch05_lab1_mcp_least_privilege.ipynb`: 실습 1을 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함)
-- `ch05_lab2_indirect_prompt_injection.ipynb`: 실습 2를 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함)
-- `ch05_lab3_egress_allowlist.ipynb`: 실습 3을 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함)
+- `ch05_lab1_mcp_least_privilege.ipynb`: 실습 1을 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함, 출력 없음). 실행 결과가 저장된 버전은 `ch05_lab1_mcp_least_privilege_executed.ipynb`
+- `ch05_lab2_indirect_prompt_injection.ipynb`: 실습 2를 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함, 출력 없음). 실행 결과가 저장된 버전은 `ch05_lab2_indirect_prompt_injection_executed.ipynb`
+- `ch05_lab3_egress_allowlist.ipynb`: 실습 3을 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함, 출력 없음). 실행 결과가 저장된 버전은 `ch05_lab3_egress_allowlist_executed.ipynb`
 
 ---
 

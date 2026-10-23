@@ -14,8 +14,8 @@
 - `exit/app.py`
 - `exit/eval_set.json`
 - `exit/eval.py`
-- `ch06_lab2_pseudonymization_checkpoint.ipynb`: 실습 2를 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함)
-- `ch06_lab3_exit_rehearsal.ipynb`: 실습 3을 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함)
+- `ch06_lab2_pseudonymization_checkpoint.ipynb`: 실습 2를 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함, 출력 없음). 실행 결과가 저장된 버전은 `ch06_lab2_pseudonymization_checkpoint_executed.ipynb`
+- `ch06_lab3_exit_rehearsal.ipynb`: 실습 3을 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함, 출력 없음). 실행 결과가 저장된 버전은 `ch06_lab3_exit_rehearsal_executed.ipynb`
 
 ---
 

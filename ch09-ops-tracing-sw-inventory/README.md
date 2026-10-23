@@ -23,10 +23,10 @@
 - `sw-inventory/merge_report.py`
 - `sw-inventory/watchlist.csv`
 - `trace/trace_app.py`
-- `ch09_lab1_sw_inventory.ipynb`: 실습 1을 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함)
-- `ch09_lab2_trace_id_masking.ipynb`: 실습 2를 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함)
-- `ch09_lab3_cloud_eol_check.ipynb`: 실습 3을 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함)
-- `ch09_lab4_patch_verify_workaround.ipynb`: 실습 4를 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함)
+- `ch09_lab1_sw_inventory.ipynb`: 실습 1을 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함, 출력 없음). 실행 결과가 저장된 버전은 `ch09_lab1_sw_inventory_executed.ipynb`
+- `ch09_lab2_trace_id_masking.ipynb`: 실습 2를 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함, 출력 없음). 실행 결과가 저장된 버전은 `ch09_lab2_trace_id_masking_executed.ipynb`
+- `ch09_lab3_cloud_eol_check.ipynb`: 실습 3을 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함, 출력 없음). 실행 결과가 저장된 버전은 `ch09_lab3_cloud_eol_check_executed.ipynb`
+- `ch09_lab4_patch_verify_workaround.ipynb`: 실습 4를 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함, 출력 없음). 실행 결과가 저장된 버전은 `ch09_lab4_patch_verify_workaround_executed.ipynb`
 
 ---
 
