@@ -22,123 +22,16 @@
 
 ---
 
-# 실습 준비. Windows PC에 WSL2로 리눅스·Docker 실습 환경 만들기
+# 실습 준비
 
-> 이 책의 코드 실습은 대부분 리눅스(WSL2의 Ubuntu)에서 확인했고, 그중 2장 실습 1, 5장 실습 3, 6장 실습 3, 7장 실습 2, 8장 실습 1·2, 9장 실습 4는 Docker도 필요합니다. 별도의 리눅스 서버가 없어도, Windows PC에 WSL2(Windows Subsystem for Linux)를 켜면 PC 안에서 진짜 리눅스(Ubuntu)를 돌릴 수 있습니다. 소요 시간은 20~30분입니다(내려받기 시간 포함).
-> 이 책의 화면은 Windows 11 Pro(10.0.26200), WSL 3.0.3, Ubuntu 24.04, Docker 29.1.3, Trivy 0.76.0에서 실제로 실행해 캡처했습니다.
-
-## 1단계. WSL과 Ubuntu 설치
-
-시작 메뉴에서 **Windows PowerShell을 마우스 오른쪽 버튼으로 눌러 "관리자 권한으로 실행"** 한 뒤 다음 명령을 입력합니다.
-
-```powershell
-wsl --install -d Ubuntu-24.04
-```
-
-```text
-다운로드 중: Ubuntu 24.04 LTS
-설치 중: Ubuntu 24.04 LTS
-배포가 설치되었습니다. 'wsl.exe -d Ubuntu-24.04'을(를) 통해 시작할 수 있습니다.
-```
-
-- WSL을 처음 켜는 PC라면 "가상 머신 플랫폼" 기능이 함께 켜지고, **재부팅을 요구**할 수 있습니다. 재부팅한 뒤 같은 명령을 한 번 더 실행합니다.
-- 회사 PC에서 설치가 막혀 있다면 BIOS의 가상화(Intel VT-x, AMD-V) 설정이나 회사 보안 정책 때문일 수 있습니다. 실습용 PC를 쓰거나 IT 부서에 문의합니다.
-
-설치가 끝나면 버전과 상태를 확인합니다. `VERSION`이 **2**여야 Docker가 동작합니다.
-
-```powershell
-wsl --version
-wsl -l -v
-```
-
-![화면 8-1](../docs/images/화면8-1_WSL_설치확인.png)
-
-*[화면 8-1] WSL 설치 확인*
-
-## 2단계. Ubuntu 처음 실행과 사용자 만들기
-
-```powershell
-wsl -d Ubuntu-24.04
-```
-
-처음 실행하면 리눅스에서 쓸 사용자 이름과 비밀번호를 묻습니다. Windows 계정과 달라도 됩니다. 이 책의 화면은 `aisec`이라는 사용자로 진행했습니다. 비밀번호는 입력해도 화면에 표시되지 않습니다.
-
-```text
-Create a default Unix user account: aisec
-New password:
-Retype new password:
-```
-
-이제부터의 명령은 모두 이 Ubuntu 터미널(`aisec@...:~$` 프롬프트)에서 실행합니다. 시작 메뉴의 "Ubuntu 24.04"나 Windows Terminal의 탭 목록에서도 바로 열 수 있습니다.
-
-## 3단계. Docker 설치
-
-Ubuntu 공식 저장소의 Docker 엔진을 설치하고, 매번 `sudo`를 붙이지 않도록 사용자를 `docker` 그룹에 넣습니다.
-
-```bash
-sudo apt update
-sudo apt install -y docker.io docker-compose-v2 docker-buildx
-sudo usermod -aG docker $USER
-exit                     # 그룹 변경을 반영하려고 한 번 나갔다가
-```
-
-```powershell
-wsl -d Ubuntu-24.04      # 다시 들어옵니다
-```
-
-```bash
-docker --version
-docker compose version
-docker run --rm hello-world | head -4
-```
-
-Docker 29.1.3과 Docker Compose 2.40.3이 설치되고 hello-world 컨테이너가 실행되면 준비가 끝난 것입니다.
-
-![화면 8-2](../docs/images/화면8-2_Docker_동작확인.png)
-
-*[화면 8-2] Docker 동작 확인*
-
-> Ubuntu 24.04의 WSL은 systemd가 기본으로 켜져 있어 Docker가 자동으로 시작됩니다. `Cannot connect to the Docker daemon` 오류가 나오면 `sudo systemctl start docker`로 직접 시작합니다.
-> WSL은 열려 있는 터미널이 하나도 없으면 잠시 뒤 리눅스를 내립니다. 실습 중 컨테이너를 띄워 둘 때는 Ubuntu 터미널을 하나 열어 둡니다.
-
-## 4단계. Trivy 설치 (공식 저장소와 서명 키로)
-
-5-2에서 본 것처럼 2026년 3월 Trivy의 배포 과정이 침해된 적이 있습니다. 보안 도구도 공급망 공격의 대상이므로, **공식 저장소를 서명 키와 함께 등록해** 설치하고 버전을 기록합니다.
-
-```bash
-sudo apt install -y wget gnupg
-wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key \
-  | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
-echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" \
-  | sudo tee /etc/apt/sources.list.d/trivy.list
-sudo apt update && sudo apt install -y trivy
-trivy --version
-```
-
-`signed-by`로 지정한 키로 서명된 패키지만 설치되므로, 누군가 중간에서 패키지를 바꿔치기해도 설치가 거부됩니다. 설치한 버전은 실습 기록에 남겨 둡니다. 나중에 해당 버전에 문제가 알려졌을 때 영향 여부를 바로 확인할 수 있습니다.
-
-## 5단계. 실습 파일 가져오기
-
-WSL에서는 Windows의 드라이브가 `/mnt/c`, `/mnt/d`로 보입니다. 책의 실습 파일을 리눅스 홈 디렉터리로 복사합니다. Windows 폴더에서 바로 작업해도 되지만, 리눅스 홈에서 작업하는 편이 빌드가 훨씬 빠릅니다.
-
-```bash
-cp -r "/mnt/c/<이 저장소를 내려받은 경로>/ch08-devsecops-image-gate/image-lab" ~/image-lab
-cd ~/image-lab
-ls
-```
-
-```text
-Dockerfile  Dockerfile.old  app.py  gate.py  requirements-old.txt  requirements.txt
-```
-
-실습 환경이 준비되었습니다.
+> 실습 환경 준비(WSL2·Docker·Trivy 설치, 저장소 내려받기, VS Code와 Jupyter 노트북 연결)는 저장소 맨 위의 **[SETUP.md](../SETUP.md)**로 옮겼습니다. 책 본문에서 "`ch08-devsecops-image-gate`의 [실습 준비]"를 보라고 한 곳도 이 문서를 보면 됩니다.
 
 ---
 
 # 실습 1. Windows PC의 WSL에서 컨테이너 이미지를 직접 만들고, CVE를 찾아 보안 Gate 판정해보기
 
 > 8장 [실습] 1번의 단계별 안내입니다. WSL의 Ubuntu에서 작은 AI 서빙 앱을 **직접 컨테이너 이미지로 빌드**하고, Trivy로 CVE를 스캔하고 SBOM을 만든 뒤, CISA KEV와 FIRST EPSS를 조회해 표 8-10의 기준으로 "차단/경고/통과"를 판정합니다. 오래된 베이스 이미지로 만든 v1과 지원 중인 베이스 이미지로 다시 만든 v2를 비교합니다. 소요 시간은 40~60분입니다.
-> 먼저 [실습 준비]의 WSL2·Docker·Trivy 설치를 마칩니다. 아래 결과는 2026년 10월 17일 기준입니다. CVE와 KEV·EPSS 정보는 매일 바뀌므로, 직접 실행하면 숫자가 조금 다를 수 있습니다.
+> 먼저 [SETUP.md](../SETUP.md)의 1~5단계(WSL2·Docker·Trivy 설치와 저장소 내려받기)를 마칩니다. 아래 결과는 2026년 10월 17일 기준입니다. CVE와 KEV·EPSS 정보는 매일 바뀌므로, 직접 실행하면 숫자가 조금 다를 수 있습니다.
 
 ## 실습 흐름
 
@@ -161,6 +54,18 @@ flowchart LR
 
 ## 1단계. 실습 앱과 두 가지 Dockerfile 살펴보기
 
+먼저 실습 파일을 리눅스 홈 디렉터리의 작업 폴더로 복사하고 그 폴더로 이동합니다. 이후 명령은 모두 이 폴더에서 실행합니다.
+
+```bash
+cp -r ~/ai-cloud-security-labs/ch08-devsecops-image-gate/image-lab ~/image-lab
+cd ~/image-lab
+ls
+```
+
+```text
+Dockerfile  Dockerfile.old  app.py  gate.py  requirements-old.txt  requirements.txt
+```
+
 `app.py`는 질문을 받아 답하는 흉내만 내는 FastAPI 앱입니다. 모델은 없지만, 실제 AI 서빙 이미지와 마찬가지로 **베이스 이미지(OS 패키지) + Python 런타임 + 오픈소스 라이브러리 + 우리 코드**로 이루어집니다. 8-3에서 본 기반 계층 가운데 의존성과 베이스 이미지가 한 이미지 안에 들어오는 구조입니다.
 
 | 파일 | 베이스 이미지 | 의존성 | 의도 |
@@ -176,9 +81,9 @@ docker build -f Dockerfile.old -t ai-serving:v1 .
 docker images ai-serving
 ```
 
-![화면 8-3](../docs/images/화면8-3_v1_이미지_빌드.png)
+![화면 8-1](../docs/images/화면8-1_v1_이미지_빌드.png)
 
-*[화면 8-3] v1 이미지 빌드*
+*[화면 8-1] v1 이미지 빌드*
 
 빌드 로그의 `[1/5] FROM ...python:3.9.0-slim@sha256:...`에 주목합니다. 태그(`3.9.0-slim`)는 바뀔 수 있지만 다이제스트(`sha256:...`)는 이미지 내용 그 자체를 가리킵니다. 운영 파이프라인에서는 베이스 이미지를 다이제스트로 고정하고, 갱신할 때만 바꿉니다.
 
@@ -194,9 +99,9 @@ trivy image --format cyclonedx -o sbom-v1.json ai-serving:v1 # SBOM (CycloneDX)
 
 v1은 OS 패키지(Debian 10.6)에서 HIGH 이상 126건(CRITICAL 26), Python 패키지에서 41건(CRITICAL 4)이 나오고, SBOM 파일이 함께 만들어집니다.
 
-![화면 8-4](../docs/images/화면8-4_v1_Trivy_스캔_SBOM.png)
+![화면 8-2](../docs/images/화면8-2_v1_Trivy_스캔_SBOM.png)
 
-*[화면 8-4] v1 스캔 결과*
+*[화면 8-2] v1 스캔 결과*
 
 결과를 보면 취약점의 대부분이 **우리가 직접 고른 라이브러리가 아니라 베이스 이미지의 OS 패키지**에서 나왔습니다. 개발자는 `requirements-old.txt`만 신경 썼겠지만, `FROM` 한 줄이 126건을 끌고 들어왔습니다. 8-5에서 "실제 배포물 기준"으로 SBOM을 만들어야 한다고 한 이유입니다. `sbom-v1.json`을 열어 보면 Python 패키지뿐 아니라 `openssl`, `libc6`, `zlib1g` 같은 OS 패키지까지 모두 구성요소로 기록되어 있습니다.
 
@@ -264,9 +169,9 @@ tail -1 gate-v1.txt
 
 v1은 차단 5건(KEV 등재 1건, CRITICAL이면서 EPSS가 높은 4건)이 나와 종료 코드 1, "배포 불가"로 판정됩니다.
 
-![화면 8-5](../docs/images/화면8-5_v1_보안Gate_판정.png)
+![화면 8-3](../docs/images/화면8-3_v1_보안Gate_판정.png)
 
-*[화면 8-5] v1 보안 Gate 판정*
+*[화면 8-3] v1 보안 Gate 판정*
 
 > EPSS 차단 기준(0.1 = 30일 내 악용 확률 10%)은 예시입니다. 조직의 위험 허용 수준에 맞게 정합니다. 표 8-10의 "인터넷 노출 구성요소" 조건은 이미지 정보만으로는 알 수 없으므로, 실무에서는 8-1의 외부 노출 구성요소 목록과 결합합니다.
 
@@ -288,9 +193,9 @@ tail -1 gate-v2.txt
 
 v2는 OS 패키지 44건, Python 패키지 24건(CRITICAL 0)으로 줄고, 차단 0건이라 종료 코드 0, "배포 가능"으로 판정됩니다.
 
-![화면 8-6](../docs/images/화면8-6_v2_재빌드_재판정.png)
+![화면 8-4](../docs/images/화면8-4_v2_재빌드_재판정.png)
 
-*[화면 8-6] v2 재빌드와 재판정*
+*[화면 8-4] v2 재빌드와 재판정*
 
 `[표 실습8-1]` 이미지 버전별 판정 결과
 
@@ -344,7 +249,7 @@ WSL 자체를 지우려면 PowerShell에서 `wsl --unregister Ubuntu-24.04`를 �
 # 실습 2. 오픈소스 도구로 Jailbreak 성공률 측정해보기
 
 > 8장 [실습] 2번의 단계별 안내입니다. NVIDIA가 공개한 LLM 취약점 점검 도구 garak으로 내 PC의 작은 공개 모델 두 개에 직접 주입, 간접 주입, 탈옥 공격을 자동으로 시험하고, 결과를 "성공률"로 읽는 방법을 익힙니다. 소요 시간은 60분 안팎입니다(모델 내려받기와 garak 실행 세 번 포함).
-> 먼저 [실습 준비]의 WSL2·Docker 설치를 마칩니다. 모델은 내 PC의 로컬 모델 서버(Ollama)에 띄우므로 API Key가 필요 없습니다. 아래 결과는 2026년 10월 19일 WSL2의 Ubuntu 24.04, Python 3.12, garak 0.17.0, Ollama 0.6.5에서 실행한 것입니다.
+> 먼저 [SETUP.md](../SETUP.md)의 1~5단계(WSL2·Docker 설치와 저장소 내려받기)를 마칩니다. 모델은 내 PC의 로컬 모델 서버(Ollama)에 띄우므로 API Key가 필요 없습니다. 아래 결과는 2026년 10월 19일 WSL2의 Ubuntu 24.04, Python 3.12, garak 0.17.0, Ollama 0.6.5에서 실행한 것입니다.
 
 ## 실습 흐름
 
@@ -366,7 +271,8 @@ flowchart LR
 6장 실습 3과 같은 로컬 모델 서버(Ollama)에 작은 공개 모델 두 개를 내려받습니다. 6장 실습 3의 모델 서버가 아직 떠 있다면 그대로 써도 됩니다.
 
 ```bash
-cp -r "<이 저장소 경로>/ch08-devsecops-image-gate/garak-lab" ~/garak-work
+# ~/ai-cloud-security-labs가 없다면 SETUP.md 5단계를 먼저 합니다
+cp -r ~/ai-cloud-security-labs/ch08-devsecops-image-gate/garak-lab ~/garak-work
 cd ~/garak-work
 chmod +x summarize.sh
 docker compose up -d
@@ -448,9 +354,9 @@ python -m garak --config lab.yaml --target_type ollama --target_name llama3.2:1b
 ./summarize.sh qwen-1 qwen-2 llama-1
 ```
 
-![화면 8-7](../docs/images/화면8-7_garak_실행결과_비교.png)
+![화면 8-5](../docs/images/화면8-5_garak_실행결과_비교.png)
 
-*[화면 8-7] garak 실행 결과 비교*
+*[화면 8-5] garak 실행 결과 비교*
 
 `[표 실습8-2]` 공격 유형별 성공률
 
@@ -559,7 +465,8 @@ flowchart TD
 ## 1단계. 검사 없이 실행하기
 
 ```bash
-cp -r "<이 저장소 경로>/ch08-devsecops-image-gate/agent-guard" ~/guard-lab
+# ~/ai-cloud-security-labs가 없다면 SETUP.md 5단계를 먼저 합니다
+cp -r ~/ai-cloud-security-labs/ch08-devsecops-image-gate/agent-guard ~/guard-lab
 cd ~/guard-lab
 python3 runner.py --no-guard
 ```

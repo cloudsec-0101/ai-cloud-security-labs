@@ -20,10 +20,11 @@
 
 ## 실습 준비
 
-먼저 8장 README의 [실습 준비]에서 WSL2·Docker 설치를 마칩니다. API Key는 필요 없습니다. 정책 엔진 OPA는 Docker 이미지로 실행하므로 따로 설치하지 않아도 됩니다. 실습 2는 Python 3와 PyYAML을 씁니다. Ubuntu 24.04에는 보통 설치되어 있고, 없으면 `sudo apt install -y python3-yaml`로 설치합니다.
+먼저 [SETUP.md](../SETUP.md)의 1~5단계(WSL2·Docker 설치와 저장소 내려받기)를 마칩니다. API Key는 필요 없습니다. 정책 엔진 OPA는 Docker 이미지로 실행하므로 따로 설치하지 않아도 됩니다. 실습 2는 Python 3와 PyYAML을 씁니다. Ubuntu 24.04에는 보통 설치되어 있고, 없으면 `sudo apt install -y python3-yaml`로 설치합니다.
 
 ```bash
-cp -r "<이 저장소 경로>/ch10-policy-as-code-shadow-ai" ~/ch10-lab
+# ~/ai-cloud-security-labs가 없다면 SETUP.md 5단계를 먼저 합니다
+cp -r ~/ai-cloud-security-labs/ch10-policy-as-code-shadow-ai ~/ch10-lab
 docker pull openpolicyagent/opa:1.0.0
 python3 -c "import yaml; print('PyYAML', yaml.__version__)"
 ```

@@ -121,7 +121,8 @@ AI SaaS는 보통 여러 문서에 정보를 나눠 둡니다. 아래 문서를 
 ## 1단계. 실습 환경 준비
 
 ```bash
-cp -r "<이 저장소 경로>/ch06-aiaas-vendor-evaluation/hybrid" ~/hybrid-lab
+# ~/ai-cloud-security-labs가 없다면 SETUP.md 5단계를 먼저 합니다
+cp -r ~/ai-cloud-security-labs/ch06-aiaas-vendor-evaluation/hybrid ~/hybrid-lab
 cd ~/hybrid-lab
 python3 fake_ai.py &        # 외부 AI 서비스(흉내)를 뒤에서 실행
 ```
@@ -213,7 +214,7 @@ cd ~ && rm -rf ~/hybrid-lab
 # 실습 3. AI Gateway로 공급자를 바꾸는 Exit 리허설
 
 > 6장 [실습] 3번의 단계별 안내입니다. 6-4 "공급자 종속, 서비스 종료와 Exit Plan"의 추상화 계층과 대체 공급자 사전 검증을 직접 해 봅니다. 소요 시간은 40~60분입니다(모델 내려받기 포함).
-> Docker와 Python 3가 필요합니다. Windows PC라면 [8장 README](../ch08-devsecops-image-gate/README.md)의 [실습 준비]에서 WSL2·Docker 설치를 먼저 마칩니다. 두 공급자는 로컬 모델 서버(Ollama)의 소형 모델 두 개로 대신하므로 API Key가 필요 없습니다. 아래 결과는 2026년 10월 18일 WSL2의 Ubuntu 24.04, Docker 29.1.3, Ollama 0.6.5에서 실행한 것입니다.
+> Docker와 Python 3가 필요합니다. Windows PC라면 [SETUP.md](../SETUP.md)의 1~5단계(WSL2·Docker 설치와 저장소 내려받기)를 먼저 마칩니다. 두 공급자는 로컬 모델 서버(Ollama)의 소형 모델 두 개로 대신하므로 API Key가 필요 없습니다. 아래 결과는 2026년 10월 18일 WSL2의 Ubuntu 24.04, Docker 29.1.3, Ollama 0.6.5에서 실행한 것입니다.
 
 ## 실습 시나리오
 
@@ -244,7 +245,8 @@ cd ~ && rm -rf ~/hybrid-lab
 ## 2단계. 실습 환경 띄우기
 
 ```bash
-cp -r "<이 저장소 경로>/ch06-aiaas-vendor-evaluation/exit" ~/exit-lab
+# ~/ai-cloud-security-labs가 없다면 SETUP.md 5단계를 먼저 합니다
+cp -r ~/ai-cloud-security-labs/ch06-aiaas-vendor-evaluation/exit ~/exit-lab
 cd ~/exit-lab
 docker compose up -d
 docker compose exec ollama ollama pull qwen2.5:0.5b     # 공급자 1 (약 400MB)

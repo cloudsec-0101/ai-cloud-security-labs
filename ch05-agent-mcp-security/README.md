@@ -263,7 +263,7 @@ python sanitize.py notes-b.html > clean-b.txt
 # 실습 3. Agent 실행 환경의 Egress를 허용 목록으로 제한해보기
 
 > 5장 [실습] 3번의 단계별 안내입니다. 5-4 "Sandbox 격리와 Egress 통제"의 목적지 허용 목록, 기록, 긴급 차단을 Docker로 직접 구성해 봅니다. 소요 시간은 30분입니다.
-> Docker가 필요합니다. Windows PC라면 [8장 README](../ch08-devsecops-image-gate/README.md)의 [실습 준비]에서 WSL2·Docker 설치를 먼저 마칩니다. 실습 파일은 GitHub 저장소의 `ch05-agent-mcp-security/egress` 폴더에 있습니다. 아래 결과는 2026년 10월 18일 WSL2의 Ubuntu 24.04, Docker 29.1.3에서 실행한 것입니다.
+> Docker가 필요합니다. Windows PC라면 [SETUP.md](../SETUP.md)의 1~5단계(WSL2·Docker 설치와 저장소 내려받기)를 먼저 마칩니다. 실습 파일은 GitHub 저장소의 `ch05-agent-mcp-security/egress` 폴더에 있습니다. 아래 결과는 2026년 10월 18일 WSL2의 Ubuntu 24.04, Docker 29.1.3에서 실행한 것입니다.
 
 ## 실습 시나리오
 
@@ -325,7 +325,8 @@ services:
 ## 1단계. 실습 환경 띄우기
 
 ```bash
-cp -r "/mnt/c/<저장소 경로>/ch05-agent-mcp-security/egress" ~/egress-lab
+# ~/ai-cloud-security-labs가 없다면 SETUP.md 5단계를 먼저 합니다
+cp -r ~/ai-cloud-security-labs/ch05-agent-mcp-security/egress ~/egress-lab
 cd ~/egress-lab
 docker compose up -d
 ```

@@ -33,7 +33,7 @@
 # 실습 1. Windows Server와 Ubuntu 서버의 OS·SW 버전 자동 수집하기
 
 > 9장 [실습] 1번의 단계별 안내입니다. 9-1에서 패치 자동화의 전제는 **현황관리(SW 버전정보 수집)**이라고 했습니다. 이 실습에서는 Windows Server와 Ubuntu 서버에서 OS와 설치된 SW의 버전을 사람 손을 거치지 않고 수집하는 스크립트를 실행하고, 여러 서버의 결과를 하나로 합쳐 기준 버전과 대조합니다. 소요 시간은 40~60분입니다.
-> 이 책의 화면은 Windows 11 Pro(PowerShell 5.1)와 WSL2의 Ubuntu 24.04에서 실행했습니다. Windows 수집 스크립트는 Windows Server 2016~2025에서도 같은 명령으로 동작합니다. Ubuntu는 8장 [실습 준비]의 WSL2 환경을 그대로 쓰거나, 실습용 Ubuntu 서버(VM)를 써도 됩니다.
+> 이 책의 화면은 Windows 11 Pro(PowerShell 5.1)와 WSL2의 Ubuntu 24.04에서 실행했습니다. Windows 수집 스크립트는 Windows Server 2016~2025에서도 같은 명령으로 동작합니다. Ubuntu는 [SETUP.md](../SETUP.md)의 WSL2 환경을 그대로 쓰거나, 실습용 Ubuntu 서버(VM)를 써도 됩니다.
 
 ## 실습 구성
 
@@ -47,10 +47,11 @@
 
 두 수집 스크립트는 9-1의 영역 구분을 그대로 따릅니다. **OS 패키지**(레지스트리, dpkg)는 패키지 관리자의 기록으로, **운영자가 직접 설치한 SW**는 대기 중인 프로세스와 /opt·/usr/local 경로로 찾습니다. 그리고 호스트명은 겹칠 수 있으므로, 모든 결과에 기기 고유 식별자(Windows의 MachineGuid, Linux의 machine-id)를 함께 남깁니다(9-1).
 
-실습 파일을 각 서버로 가져옵니다. Windows에서는 이 저장소의 `ch09-ops-tracing-sw-inventory/sw-inventory` 폴더를 `C:\sw-inventory`로 복사하고, Ubuntu에서는 홈 디렉터리로 복사합니다.
+실습 파일을 각 서버로 가져옵니다. Ubuntu에서는 내려받은 저장소에서 홈 디렉터리로 복사합니다. Windows에서는 `ch09-ops-tracing-sw-inventory/sw-inventory` 폴더를 `C:\sw-inventory`로 복사합니다. WSL을 쓰는 PC라면 PowerShell에서 `Copy-Item -Recurse \\wsl.localhost\Ubuntu-24.04\home\<사용자 이름>\ai-cloud-security-labs\ch09-ops-tracing-sw-inventory\sw-inventory C:\sw-inventory`로 복사하고, WSL이 없는 서버라면 GitHub 저장소 페이지의 **Code → Download ZIP**으로 받아 압축을 푼 뒤 같은 폴더를 복사합니다.
 
 ```bash
-cp -r "<이 저장소 경로>/ch09-ops-tracing-sw-inventory/sw-inventory" ~/sw-inventory
+# ~/ai-cloud-security-labs가 없다면 SETUP.md 5단계를 먼저 합니다
+cp -r ~/ai-cloud-security-labs/ch09-ops-tracing-sw-inventory/sw-inventory ~/sw-inventory
 ```
 
 ## 1단계. Windows Server에서 수집
@@ -88,7 +89,7 @@ Windows에서는 OS 버전, 핫픽스 5개, 레지스트리에 등록된 설치 
 
 ## 2단계. Ubuntu 서버에서 수집
 
-실제 서버처럼 만들기 위해, OS 패키지 관리자를 거치지 않는 설치 세 가지를 먼저 만들어 둡니다. 압축 파일로 설치한 WAS(Tomcat), pip로 설치한 Python 라이브러리, 내려받아 복사한 단일 실행 파일(gitleaks)입니다. 파일 시스템 SBOM 스캔에 쓰는 Trivy는 8장 [실습 준비]에서 설치했습니다.
+실제 서버처럼 만들기 위해, OS 패키지 관리자를 거치지 않는 설치 세 가지를 먼저 만들어 둡니다. 압축 파일로 설치한 WAS(Tomcat), pip로 설치한 Python 라이브러리, 내려받아 복사한 단일 실행 파일(gitleaks)입니다. 파일 시스템 SBOM 스캔에 쓰는 Trivy는 [SETUP.md](../SETUP.md) 4단계에서 설치했습니다.
 
 ```bash
 # WAS를 압축 파일로 설치 (일부러 오래된 버전)
@@ -222,7 +223,8 @@ sudo rm -f /usr/local/bin/gitleaks /tmp/gitleaks_*
 Ubuntu 24.04에는 `pip` 명령이 없고, 시스템 Python에 패키지를 바로 설치하는 것도 막혀 있습니다. 가상환경을 만들어 설치합니다.
 
 ```bash
-cp -r "<이 저장소 경로>/ch09-ops-tracing-sw-inventory/trace" ~/trace-lab
+# ~/ai-cloud-security-labs가 없다면 SETUP.md 5단계를 먼저 합니다
+cp -r ~/ai-cloud-security-labs/ch09-ops-tracing-sw-inventory/trace ~/trace-lab
 cd ~/trace-lab
 sudo apt install -y python3-venv
 python3 -m venv ~/trace-venv
@@ -399,7 +401,8 @@ rm -rf ~/trace-lab ~/trace-venv
 ## 1단계. 지원 종료 일정을 API로 확인해 보기
 
 ```bash
-cp -r "<이 저장소 경로>/ch09-ops-tracing-sw-inventory/cloud-eol" ~/eol-lab
+# ~/ai-cloud-security-labs가 없다면 SETUP.md 5단계를 먼저 합니다
+cp -r ~/ai-cloud-security-labs/ch09-ops-tracing-sw-inventory/cloud-eol ~/eol-lab
 cd ~/eol-lab
 curl -s https://endoflife.date/api/amazon-eks.json | python3 -m json.tool | head -9
 ```
@@ -522,7 +525,7 @@ cd ~ && rm -rf ~/eol-lab
 # 실습 4. 패치를 자동으로 배포하고, 결과를 확인하고, 패치 전에는 Workaround로 막기
 
 > 9장 [실습] 4번의 단계별 안내입니다. 서버 3대로 이루어진 작은 서비스에 보안 공지가 들어온 상황에서, 9-4의 세 가지 질문을 직접 해 봅니다. 패치 전 Workaround를 적용하고 그 효과를 확인하는가, 패치를 자동으로 배포하고 문제가 생기면 자동으로 되돌리는가, "패치 완료" 보고가 아니라 다시 점검한 결과로 조치를 확인하는가입니다. 소요 시간은 30~40분입니다.
-> 먼저 8장 README의 [실습 준비]에서 WSL2·Docker 설치를 마칩니다. API Key는 필요 없습니다. 아래 결과는 2026년 10월 20일 WSL2의 Ubuntu 24.04, Docker 29.1, Python 3.12에서 실행한 것입니다.
+> 먼저 [SETUP.md](../SETUP.md)의 1~5단계(WSL2·Docker 설치와 저장소 내려받기)를 마칩니다. API Key는 필요 없습니다. 아래 결과는 2026년 10월 20일 WSL2의 Ubuntu 24.04, Docker 29.1, Python 3.12에서 실행한 것입니다.
 
 ## 실습 시나리오
 
@@ -555,7 +558,8 @@ cd ~ && rm -rf ~/eol-lab
 ## 1단계. 환경 만들기와 현황 보기
 
 ```bash
-cp -r "<이 저장소 경로>/ch09-ops-tracing-sw-inventory/patch-cycle" ~/patch-lab
+# ~/ai-cloud-security-labs가 없다면 SETUP.md 5단계를 먼저 합니다
+cp -r ~/ai-cloud-security-labs/ch09-ops-tracing-sw-inventory/patch-cycle ~/patch-lab
 cd ~/patch-lab
 chmod +x setup.sh
 ./setup.sh

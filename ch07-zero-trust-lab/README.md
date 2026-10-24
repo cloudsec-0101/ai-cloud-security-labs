@@ -86,7 +86,7 @@
 # 실습 2. [토이 프로젝트] 내 PC에 미니 제로트러스트 랩 만들기
 
 > 7장 [실습] 2번의 단계별 안내입니다. 그림 7-2의 네 계층을 오픈소스와 짧은 Python 코드로 연결해, 내 PC 한 대 안에 작은 "회사"를 만듭니다. 요청마다 판단하고(②), 집행하고(③), 탐지 결과가 다시 판단을 바꾸는(④→②) 흐름을 직접 확인합니다. 소요 시간은 1~2시간입니다.
-> Docker가 필요합니다. Windows PC라면 [8장 README](../ch08-devsecops-image-gate/README.md)의 [실습 준비]에서 WSL2·Docker 설치를 먼저 진행합니다. 모든 명령은 WSL의 Ubuntu 터미널에서 실행합니다. 이 책의 실행 예시는 Ubuntu 24.04, Docker 29.1, Docker Compose 2.40에서 확인했습니다.
+> Docker가 필요합니다. Windows PC라면 [SETUP.md](../SETUP.md)의 1~5단계(WSL2·Docker 설치와 저장소 내려받기)를 먼저 진행합니다. 모든 명령은 WSL의 Ubuntu 터미널에서 실행합니다. 이 책의 실행 예시는 Ubuntu 24.04, Docker 29.1, Docker Compose 2.40에서 확인했습니다.
 
 ## 랩 구성
 
@@ -154,7 +154,8 @@ sequenceDiagram
 이 폴더(`ch07-zero-trust-lab`)를 WSL의 홈 디렉터리로 복사한 뒤 실행합니다.
 
 ```bash
-cp -r "<이 저장소 경로>/ch07-zero-trust-lab" ~/zt-lab
+# ~/ai-cloud-security-labs가 없다면 SETUP.md 5단계를 먼저 합니다
+cp -r ~/ai-cloud-security-labs/ch07-zero-trust-lab ~/zt-lab
 cd ~/zt-lab
 chmod +x try.sh
 docker compose up -d --build        # 처음에는 이미지 내려받기와 빌드에 몇 분 걸립니다
@@ -359,7 +360,8 @@ flowchart LR
 ## 1단계. 권한 정보 없이 색인하기
 
 ```bash
-cp -r "<이 저장소 경로>/ch07-zero-trust-lab/rag-acl" ~/rag-lab
+# ~/ai-cloud-security-labs가 없다면 SETUP.md 5단계를 먼저 합니다
+cp -r ~/ai-cloud-security-labs/ch07-zero-trust-lab/rag-acl ~/rag-lab
 cd ~/rag-lab
 python3 rag.py index --no-acl
 python3 rag.py ask partner "협력사 대금 지급 일정과 단가 기준 알려줘"

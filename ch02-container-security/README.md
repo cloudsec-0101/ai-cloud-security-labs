@@ -13,7 +13,7 @@
 # 실습 1. 컨테이너 격리의 벽과 그 벽을 무너뜨리는 설정 확인해보기
 
 > 2장 [실습] 1번의 단계별 안내입니다. 그림 2-2에서 본 리눅스 컨테이너의 격리(네임스페이스·cgroups)를 직접 확인하고, 설정 한 줄로 그 격리가 무너지는 모습을 봅니다. 소요 시간은 30~40분입니다.
-> Docker와 Trivy가 필요합니다. Windows PC라면 [8장 README](../ch08-devsecops-image-gate/README.md)의 [실습 준비]에서 WSL2·Docker·Trivy 설치를 먼저 마칩니다. 아래 결과와 화면은 2026년 10월 18일 Ubuntu 24.04(WSL2), Docker 29.1.3, Trivy 0.76.0, kind 0.24.0(쿠버네티스 1.31)에서 실행한 것입니다.
+> Docker와 Trivy가 필요합니다. Windows PC라면 [SETUP.md](../SETUP.md)의 1~5단계(WSL2·Docker·Trivy 설치와 저장소 내려받기)를 먼저 마칩니다. 아래 결과와 화면은 2026년 10월 18일 Ubuntu 24.04(WSL2), Docker 29.1.3, Trivy 0.76.0, kind 0.24.0(쿠버네티스 1.31)에서 실행한 것입니다.
 
 > **주의**: 3단계에서는 컨테이너 안에서 호스트에 파일을 만듭니다. 실습용 PC나 WSL에서만 하고, 회사 서버나 운영 환경에서는 하지 마세요.
 
@@ -26,7 +26,8 @@
 먼저 실습 파일(이 폴더의 `k8s/`)을 리눅스 홈 디렉터리로 복사하고 그 폴더로 이동합니다. 이후 명령은 모두 이 폴더에서 실행합니다.
 
 ```bash
-cp -r "<이 저장소 경로>/ch02-container-security/k8s" ~/pod-lab
+# ~/ai-cloud-security-labs가 없다면 SETUP.md 5단계를 먼저 합니다
+cp -r ~/ai-cloud-security-labs/ch02-container-security/k8s ~/pod-lab
 cd ~/pod-lab
 ```
 
@@ -292,6 +293,7 @@ kind create cluster --name pod-lab --image kindest/node:v1.31.0    # 처음에�
 ```bash
 cd ~/pod-lab
 kubectl create namespace secure-lab
+until kubectl get serviceaccount default -n secure-lab >/dev/null 2>&1; do sleep 1; done   # 기본 서비스 계정이 생길 때까지 기다림
 kubectl label namespace secure-lab pod-security.kubernetes.io/enforce=restricted
 kubectl apply -f bad-pod.yaml -n secure-lab
 kubectl apply -f good-pod.yaml -n secure-lab
@@ -307,6 +309,8 @@ pod/good-pod created
 NAME       READY   STATUS    RESTARTS   AGE
 good-pod   1/1     Running   0          12s
 ```
+
+> 네임스페이스를 만든 직후에는 기본 서비스 계정(`default`)이 몇 초 늦게 생깁니다. 그 전에 Pod를 배포하면 `serviceaccount "default" not found`로 거부되어 Pod 보안 검사 결과를 볼 수 없으므로, 두 번째 줄에서 서비스 계정이 생길 때까지 기다립니다. 이 오류가 이미 나왔다면 몇 초 뒤 `kubectl apply`를 다시 실행하면 됩니다.
 
 ![화면 2-5](../docs/images/화면2-5_PSA_restricted_거부.png)
 
