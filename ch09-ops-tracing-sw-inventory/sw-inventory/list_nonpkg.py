@@ -1,4 +1,4 @@
-"""list_nonpkg.py — 수집 결과에서 OS 패키지 관리자 밖에 설치된 SW만 골라 보여 준다 (9장 실습 2)
+"""list_nonpkg.py — 수집 결과에서 OS 패키지 관리자 밖에 설치된 SW만 골라 보여 준다 (9장 실습 1)
 사용법: python3 list_nonpkg.py [결과 파일 이름의 일부] [찾을 SW 이름 ...]
   예) python3 list_nonpkg.py web01
   예) python3 list_nonpkg.py web01 tomcat-catalina log4j-core

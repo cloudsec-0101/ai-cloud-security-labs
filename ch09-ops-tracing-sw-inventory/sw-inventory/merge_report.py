@@ -1,4 +1,4 @@
-"""merge_report.py — 여러 서버의 수집 결과를 하나로 합치고, 기준 버전 목록과 대조한다 (9장 실습 2)
+"""merge_report.py — 여러 서버의 수집 결과를 하나로 합치고, 기준 버전 목록과 대조한다 (9장 실습 1)
 사용법: python3 merge_report.py [수집 폴더] [기준 목록 CSV]
 
 입력: inventories/inventory-*.json (collect_linux.sh, collect_windows.ps1의 결과)
@@ -32,7 +32,7 @@ for f in sorted(glob.glob(os.path.join(inv_dir, "inventory-*.json"))):
     for w in watch:
         for p in pk:
             if re.search(w["name_regex"], p["name"], re.I) and p.get("version") and vkey(p["version"]) < vkey(w["min_version"]):
-                findings.append((host, p["name"], p["version"], w["min_version"], w["reason"]))
+                findings.append((host, d.get("machine_id", "")[:8], p["name"], p["version"], w["min_version"], w["reason"]))
     # 패키지 관리자 밖 SW와 그중 버전을 알 수 없는 것(숫자가 하나도 없는 버전)을 센다
     manual = [p for p in pk if p.get("source") in ("manual", "listening-process") or p.get("source", "").startswith("sbom-")]
     unknown = [p for p in manual if not re.search(r"\d", p.get("version") or "")]
@@ -51,5 +51,5 @@ with open("inventory-all.csv", "w", newline="", encoding="utf-8-sig") as fo:
     w.writerows(rows)
 print(f"\n통합 목록: inventory-all.csv ({len(rows)}행)")
 print(f"기준 버전 미달: {len(findings)}건")
-for h, n, v, m, r in findings:
-    print(f"  - {h} | {n} {v} < {m} | {r}")
+for h, mid, n, v, m, r in findings:     # 호스트명이 겹쳐도 어느 서버인지 알 수 있게 machine_id를 함께 찍는다
+    print(f"  - {h} / {mid} | {n} {v} < {m} | {r}")

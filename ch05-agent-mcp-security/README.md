@@ -397,7 +397,13 @@ docker compose exec agent curl -sS --max-time 10 -o /dev/null -w "%{http_code}\n
 curl: (5) Could not resolve proxy: egress-proxy
 ```
 
-허용된 목적지까지 포함해 모든 외부 통신이 끊겼습니다. 조사가 끝나면 `docker compose start egress-proxy`로 다시 엽니다.
+허용된 목적지까지 포함해 모든 외부 통신이 끊겼습니다. 조사가 끝나면 프록시 컨테이너를 새로 만들어 다시 엽니다.
+
+```bash
+docker compose up -d --force-recreate egress-proxy
+```
+
+> `docker compose start egress-proxy`로는 다시 열리지 않습니다. Squid가 멈출 때 남긴 PID 파일(`/var/run/squid.pid`) 때문에, 다시 시작한 Squid가 "이미 실행 중"이라며 바로 종료하기 때문입니다. 긴급 차단 절차는 **다시 여는 방법까지 미리 시험해 두어야** 합니다.
 
 `[표 실습5-5]` Egress 통제 결과 정리
 

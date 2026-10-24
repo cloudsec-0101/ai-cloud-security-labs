@@ -1,5 +1,5 @@
 ﻿<#
-  collect_windows.ps1 — Windows Server의 OS와 설치 SW 버전을 자동 수집한다 (9장 실습 2)
+  collect_windows.ps1 — Windows Server의 OS와 설치 SW 버전을 자동 수집한다 (9장 실습 1)
   사용법: powershell -ExecutionPolicy Bypass -File .\collect_windows.ps1 [-OutDir .\inventories]
   Windows Server 2016/2019/2022/2025, Windows 10/11의 Windows PowerShell 5.1에서 동작한다.
 

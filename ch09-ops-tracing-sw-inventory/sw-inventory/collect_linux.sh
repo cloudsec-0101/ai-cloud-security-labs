@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# collect_linux.sh — Ubuntu 서버의 OS와 설치 SW 버전을 자동 수집한다 (9장 실습 2)
+# collect_linux.sh — Ubuntu 서버의 OS와 설치 SW 버전을 자동 수집한다 (9장 실습 1)
 # 사용법: sudo ./collect_linux.sh [출력 폴더]   (Ubuntu 20.04/22.04/24.04에서 확인)
 #
 # 취약점 공지가 나왔을 때 "우리 서버 중 어디에 그 SW가 있나?"에 바로 답하려면 SW 목록이 먼저 있어야 한다.
