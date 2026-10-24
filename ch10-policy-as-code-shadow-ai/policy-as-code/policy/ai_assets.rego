@@ -1,4 +1,4 @@
-# AI 자산 등록 정책 (10-2의 표 10-4 위험 등급, 표 10-5 책임, 10-3 허용 목록)
+# AI 자산 등록 정책 (10-2의 표 10-5 위험 등급, 표 10-6 책임, 10-3 허용 목록)
 # 위반 메시지는 "자산 ID [분류] 이름: 내용" 형식입니다.
 #
 # 읽는 데이터: data.assets(등록된 AI 자산), data.mcp_servers(승인 MCP 목록) — registry/ai-assets.yaml
@@ -10,7 +10,7 @@ package aigov
 # 등급 순서
 rank := {"낮음": 0, "중간": 1, "높음": 2, "매우 높음": 3}
 
-# 데이터와 행동으로 정해지는 기준 등급 (표 10-4)
+# 데이터와 행동으로 정해지는 기준 등급 (표 10-5)
 # if ... else 사슬: 위에서부터 차례로 검사해 처음 맞는 등급을 쓴다 (외부 전송·실제 변경이 있으면 바로 "매우 높음")
 required_grade(a) := "매우 높음" if {
 	some x in ["external_send", "executes_changes"]
@@ -32,7 +32,7 @@ grade(a) := required_grade(a) if {
 	rank[required_grade(a)] > rank[declared(a)]
 } else := declared(a)
 
-# 등급별 승인 주체, 필요한 테스트, 재평가 주기 (표 10-4)
+# 등급별 승인 주체, 필요한 테스트, 재평가 주기 (표 10-5)
 # 승인 주체는 "이 중 하나면 된다"는 집합이다. 상위 기관의 승인은 하위 등급에서도 인정된다
 approvers := {
 	"매우 높음": {"보안위원회"},
@@ -61,7 +61,7 @@ control(a, k) := v if {
 	v != ""
 } else := "없음"
 
-# 1. 책임: 소유 부서와 최종 책임자(A) 한 명 (표 10-5)
+# 1. 책임: 소유 부서와 최종 책임자(A) 한 명 (표 10-6)
 owner_label := {"owner_dept": "소유 부서", "accountable": "최종 책임자(A)"}
 
 deny contains msg if {
