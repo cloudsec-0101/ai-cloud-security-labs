@@ -1,4 +1,4 @@
-# 8장. AI 서비스 개발 보안 — 이미지 CVE 게이트, Jailbreak 성공률, Agent Tool 호출 검증
+# 8장. AI 서비스 개발 보안 — 이미지 CVE 게이트, Jailbreak 성공률, Agent Tool 호출 검증, MCP 간 호출 인증
 
 > 책 『AI 보안, 클라우드에서 시작한다』 8장 [실습]의 코드와 단계별 안내입니다.
 
@@ -16,9 +16,13 @@
 - `agent-guard/policy.json`
 - `agent-guard/requests.json`
 - `agent-guard/runner.py`
+- `mcp-auth/services.py`
+- `mcp-auth/scenarios.json`
+- `mcp-auth/lab.py`
 - `ch08_lab1_image_cve_gate.ipynb`: 실습 1을 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함, 출력 없음). 실행 결과가 저장된 버전은 `ch08_lab1_image_cve_gate_executed.ipynb`
 - `ch08_lab2_garak_jailbreak_rate.ipynb`: 실습 2를 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함, 출력 없음). 실행 결과가 저장된 버전은 `ch08_lab2_garak_jailbreak_rate_executed.ipynb`
 - `ch08_lab3_agent_tool_guard.ipynb`: 실습 3을 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함, 출력 없음). 실행 결과가 저장된 버전은 `ch08_lab3_agent_tool_guard_executed.ipynb`
+- `ch08_lab4_mcp_caller_auth.ipynb`: 실습 4를 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함, 출력 없음). 실행 결과가 저장된 버전은 `ch08_lab4_mcp_caller_auth_executed.ipynb`
 
 ---
 
@@ -42,20 +46,7 @@
 
 ## 실습 흐름
 
-```mermaid
-flowchart LR
-    A["Dockerfile.old<br/>오래된 베이스 이미지·의존성"] -->|docker build| B["ai-serving:v1 이미지"]
-    B -->|trivy image| C["취약점 목록<br/>scan-v1.json"]
-    B -->|"trivy image --format cyclonedx"| D["SBOM<br/>sbom-v1.json"]
-    C --> E["gate.py"]
-    K["CISA KEV 목록<br/>실제 악용된 CVE"] --> E
-    P["FIRST EPSS API<br/>30일 내 악용 확률"] --> E
-    E --> F{"표 8-12 기준 판정"}
-    F -->|차단 있음| G["종료 코드 1<br/>배포 불가"]
-    F -->|차단 없음| H["종료 코드 0<br/>배포 가능"]
-    G -.->|베이스 이미지·의존성 갱신| I["Dockerfile로 v2 빌드"]
-    I -.->|다시 스캔·판정| B
-```
+![그림 실습8-1](../docs/images/그림실습8-1_이미지_CVE_Gate.png)
 
 *[그림 실습8-1] 실습 1의 흐름: 이미지를 만들고, 스캔하고, KEV·EPSS로 판정하고, 고쳐서 다시 판정한다*
 
@@ -264,16 +255,7 @@ WSL 자체를 지우려면 PowerShell에서 `wsl --unregister Ubuntu-24.04`를 �
 
 ## 실습 흐름
 
-```mermaid
-flowchart LR
-    Y["lab.yaml<br/>probe마다 공격 문장 20개,<br/>문장마다 답 3번"] --> G["garak"]
-    PR["probe 3종<br/>직접 주입, 간접 주입, 할머니 탈옥"] --> G
-    G -->|공격 문장| O["Ollama 컨테이너<br/>qwen2.5:0.5b, llama3.2:1b"]
-    O -->|모델의 답| DT["detector<br/>공격이 통했는지 판정"]
-    DT --> R["probe별 공격 성공률과<br/>신뢰 구간"]
-    R --> C{"1차와 2차,<br/>모델끼리 비교"}
-    C --> GT["보안 Gate 합격선 정하기"]
-```
+![그림 실습8-2](../docs/images/그림실습8-2_garak_성공률.png)
 
 *[그림 실습8-2] 실습 2의 흐름: 같은 공격을 여러 번 보내 성공률을 재고, 실행과 모델을 비교해 합격선을 정한다*
 
@@ -433,26 +415,9 @@ cd ~ && rm -rf ~/garak-work ~/garak-venv ~/.local/share/garak
 
 ## 실습 흐름
 
-```mermaid
-flowchart TD
-    R["requests.json<br/>Agent가 내놓은 Tool 호출 11건"] --> X["runner.py 실행기"]
-    P["policy.json<br/>허용 Tool, 인자 스키마, 작업 폴더,<br/>사내 메일 도메인, 승인 기준, 한도"] --> X
-    X --> C1{"① 긴급 중지·호출 한도"}
-    C1 -->|걸림| S["중지"]
-    C1 -->|통과| C2{"② 이 작업에 허용된 Tool인가"}
-    C2 -->|아니오| D["거부"]
-    C2 -->|예| C3{"③ 인자 이름·형식이 스키마와 맞는가"}
-    C3 -->|아니오| D
-    C3 -->|예| C4{"④ 경로는 작업 폴더 안,<br/>수신자는 사내 도메인인가"}
-    C4 -->|아니오| D
-    C4 -->|예| C5{"⑤ 위험 등급"}
-    C5 -->|읽기| A["허용: 가짜 Tool 실행"]
-    C5 -->|쓰기·사내 메일| B["사후 검토: 실행하고 검토 목록에 기록"]
-    C5 -->|대량 발송·삭제| H["승인 대기: 사람 확인 전 실행 안 함"]
-    S & D & A & B & H --> L["agent_trace.jsonl<br/>Trace ID, 판정, 사유"]
-```
+![그림 실습8-3](../docs/images/그림실습8-3_Tool호출_검사흐름.png)
 
-*[그림 실습8-3] 실습 3의 흐름: Tool 호출 요청마다 다섯 단계 검사를 거쳐 판정하고, 모든 판정을 기록한다*
+*[그림 실습8-3] 실습 3의 흐름: Tool 호출 요청마다 ①부터 차례로 검사해 걸린 자리에서 판정하고, 모든 판정을 기록한다. 아래 카드는 2단계 실행 결과(11건)이다*
 
 ## 실습 파일
 
@@ -537,7 +502,39 @@ python3 runner.py
 
 2번 요청에 주목합니다. 경로가 `workspace/`로 시작하므로 문자열 앞부분만 비교했다면 통과했을 것입니다. `../`를 정규화한 뒤 비교해야 작업 폴더 밖이라는 것이 드러납니다. 인자 검증은 "보이는 문자열"이 아니라 "실제로 가리키는 대상"을 기준으로 해야 합니다.
 
-7번은 거부가 아니라 **승인 대기**입니다. 정상 업무일 수도 있지만 되돌리기 어려운 행동이라 사람이 확인하게 합니다. 8-4의 원칙 3처럼 모든 호출에 승인을 요구하면 승인 피로가 생기므로, 읽기는 자동으로, 쓰기와 사내 메일은 사후 검토로, 대량 발송과 삭제만 사전 승인으로 나눴습니다.
+7번은 거부가 아니라 **승인 대기**입니다. 정상 업무일 수도 있지만 되돌리기 어려운 행동이라 사람이 확인하게 합니다. 8-3의 원칙 3처럼 모든 호출에 승인을 요구하면 승인 피로가 생기므로, 읽기는 자동으로, 쓰기와 사내 메일은 사후 검토로, 대량 발송과 삭제만 사전 승인으로 나눴습니다. 이 기준을 어떻게 정했는지는 다음 절에서 봅니다.
+
+## 판정 기준은 어떻게 정했나
+
+`policy.json`의 판정 기준은 모델이 정하지 않습니다. Agent를 만드는 사람이 정해 모델 바깥의 실행기(하네스)에 둡니다. 모델이 속더라도 기준은 바뀌지 않아야 하기 때문입니다. 이 실습의 기준은 다음 네 단계로 만들었습니다.
+
+1. **이 작업에 필요한 Tool만 고른다(검사 ②)**: "회의록 요약 후 팀장에게 보내기"에는 `read_file`, `write_file`, `send_mail`만 있으면 됩니다. `delete_file`과 `db_query`는 Agent에 연결되어 있어도 이 작업에서는 쓸 수 없습니다. Tool 목록은 Agent 단위가 아니라 **작업 단위**로 정합니다.
+2. **인자가 닿을 수 있는 범위를 적는다(검사 ③④)**: Tool마다 인자의 이름과 형식, 그리고 "실제로 가리키는 대상"의 범위를 정합니다. 이 실습은 경로는 `workspace/` 안, 메일은 `hanbit.example` 도메인만 허용합니다. DB Tool이라면 조회할 수 있는 테이블과 열, 웹 Tool이라면 접속할 수 있는 도메인이 여기에 해당합니다.
+3. **범위 안의 호출에 위험 등급을 매긴다(검사 ⑤)**: 두 가지를 묻습니다. **되돌릴 수 있는가**(읽기 → 수정 → 삭제·송금·배포), 그리고 **영향이 어디까지 미치는가**(나 혼자 → 사내 소수 → 다수·외부). 답에 따라 표 실습8-5처럼 나눕니다.
+4. **한도를 정한다(검사 ①)**: 정상 작업에 필요한 호출 수를 재고 여유를 조금 둡니다. 이 실습은 전체 12번, 같은 호출 3번입니다. 한도는 Agent가 같은 일을 끝없이 반복하는 사고와 비용 폭주를 막습니다.
+
+`[표 실습8-5]` 판정을 나누는 기준
+
+| 판정 | 기준 | 이 실습의 예 |
+|---|---|---|
+| 허용 | 읽기만 하고, 작업 범위 안 | `read_file` |
+| 사후 검토 | 바꾸거나 보내지만 영향이 사내 소수에 머물고 바로잡을 수 있음 | `write_file`(작업 폴더 안), 팀장 1명에게 `send_mail` |
+| 승인 대기(사전 승인) | 되돌릴 수 없거나 영향이 넓음 | `delete_file`, 수신자 6명 이상 `send_mail` |
+| 거부 | 작업에 없는 Tool, 범위 밖 인자 | `db_query`, 사외 수신자, 작업 폴더 밖 경로 |
+
+메일은 보내면 회수할 수 없지만, 수신자가 사내 1명이면 잘못 보내도 피해가 작아 사후 검토로 두었습니다. 같은 Tool이라도 **인자에 따라 등급이 달라질 수 있다**는 점이 중요합니다. 모든 호출에 승인을 받으면 승인 피로로 사람이 내용을 보지 않고 누르게 되므로(8-3 원칙 3), 사전 승인은 정말 위험한 호출에만 씁니다.
+
+판정 기준을 처음 만들 때는 다음 자료를 참고할 수 있습니다.
+
+`[표 실습8-6]` Tool 판정 기준을 만들 때 참고할 자료
+
+| 자료 | 무엇을 참고하나 |
+|---|---|
+| MCP 명세의 Tool annotations | MCP Server가 Tool마다 붙이는 힌트입니다. `readOnlyHint`(읽기만 함), `destructiveHint`(지우거나 덮어씀), `idempotentHint`(여러 번 불러도 결과가 같음), `openWorldHint`(바깥 세계와 주고받음)가 위 3단계의 두 질문과 거의 같습니다. 다만 Server가 스스로 붙이는 값이라 그대로 믿지 말고, 등록 승인 때 사람이 확인합니다(5-3의 승인 목록) |
+| OWASP Top 10 for LLM Applications 2025, LLM06 과도한 에이전시(Excessive Agency) | Agent 사고의 원인을 과도한 기능, 과도한 권한, 과도한 자율성 세 가지로 나눕니다. 각각 검사 ②(작업에 없는 Tool), ④(범위 밖 인자), ⑤(사람 승인 없는 위험 행동)에 대응합니다 |
+| 책 8-3의 표 8-7 Agentic AI 개발 보안 체크리스트 | 권한, Tool 입력·출력, 사람 승인, 한도와 중지, 기록까지 판정 기준이 빠짐없이 갖춰졌는지 점검합니다 |
+
+기준을 정했으면 `policy.json`은 코드처럼 저장소에서 리뷰를 거쳐서만 바꾸고, 실행 중인 Agent가 고칠 수 없는 곳에 둡니다(8-3 원칙 5).
 
 ## 3단계. 긴급 중지와 기록 확인하기
 
@@ -590,3 +587,174 @@ cd ~ && rm -rf ~/guard-lab
 - [ ] 2번 요청이 문자열 비교로는 통과하고 경로 정규화로는 막힌 이유를 이해했나요?
 - [ ] 거부, 사후 검토, 승인 대기를 나눈 기준은 무엇이었나요? 여러분의 Agent라면 기준을 어떻게 정할까요?
 - [ ] `policy.json`이 Agent의 "하네스"라면, 누가 어떤 절차로 고칠 수 있어야 할까요?
+
+---
+
+# 실습 4. MCP가 MCP를 부를 때, 호출받는 쪽이 호출자를 확인하기
+
+> 8장 [실습] 4번의 단계별 안내입니다. Agent가 MCP Server A를 부르고, A가 다시 MCP Server B를 부르는 구조에서 **호출받는 쪽이 "어느 Client가, 누구를 대신해, 어떤 경로로 부르는가"를 확인하는 방법**을 코드로 봅니다. 표 8-9의 "인증·인가 부재"와 "토큰 전달과 혼동된 대리인"에 해당합니다. 소요 시간은 30분입니다.
+> Python 3만 있으면 되고 외부 패키지와 API Key가 필요 없습니다. 내 PC 안(127.0.0.1의 18080~18082 포트)에서 서비스 세 개를 띄웠다가 끝나면 내립니다. 아래 결과는 2026년 10월 25일 Python 3.14에서 실행한 것입니다.
+
+## 실습 시나리오
+
+김대리가 보고서 작성 Agent(`report-agent`)에게 고객 현황 요약을 맡깁니다. Agent는 사내 문서 MCP Server A(`docs-hub`)를 부르고, A는 고객 정보를 얻으려고 CRM MCP Server B(`crm-mcp`)를 다시 부릅니다. A는 Agent에게는 Server이고, B에게는 Client입니다.
+
+![그림 실습8-4](../docs/images/그림실습8-4_MCP간_호출인증.png)
+
+*[그림 실습8-4] 실습 4의 구조: A는 Agent에게는 Server, B에게는 Client다*
+
+호출받는 쪽(A와 B)이 확인할 수 있는 것은 네 가지입니다.
+
+`[표 실습8-7]` 호출받는 MCP Server가 확인하는 것
+
+| 확인 | 질문 | 토큰과 요청에서 보는 곳 |
+|---|---|---|
+| ① 대상 | 이 토큰이 나에게 쓰라고 발급된 것인가 | 토큰의 `aud` |
+| ② 소유 증명 | 토큰을 받은 Client가 직접 보냈는가, 아니면 토큰만 빼낸 누군가인가 | 토큰의 `cnf`와 요청마다 붙는 `DPoP` 증명 |
+| ③ 호출 Client | 그 Client가 나를 부르도록 승인되었는가 | 토큰의 `azp`와 Server의 승인 목록 |
+| ④ 범위와 경로 | 이 Tool을 쓸 권한이 있는가, 누구를 대신해 어떤 경로로 왔는가 | 토큰의 `scope`, `sub`, `act` |
+
+MCP Server의 검사 수준을 두 가지로 바꿔 가며 같은 호출 6건을 보냅니다.
+
+| 수준 | MCP Server가 확인하는 것 | A가 B를 부를 때 쓰는 토큰 |
+|---|---|---|
+| `bearer` | 서명·만료와 범위(④의 scope)만 | Agent에게 받은 토큰을 그대로 넘김(Token Passthrough) |
+| `secure` | ①②③④ 모두 | A 자신의 신원으로 인가 서버에서 교환해 받은 B 전용 토큰 |
+
+> 🔎 (용어 풀이)
+> - **Bearer 토큰**: "가진 사람이 주인"인 토큰입니다. 현금처럼, 주운 사람도 그대로 쓸 수 있습니다.
+> - **소유 증명(Proof of Possession)**: 토큰을 쓸 때마다 "이 토큰을 받은 Client의 키를 내가 갖고 있다"는 서명을 함께 보내는 방식입니다. 기명식 수표처럼, 토큰만 빼내서는 쓸 수 없습니다. 이 실습은 DPoP(RFC 9449)를 흉내 냈고, 서버끼리라면 mTLS 인증서에 토큰을 묶는 방식(RFC 8705)도 씁니다.
+> - **client assertion**: Client가 인가 서버에 "나는 누구다"를 증명할 때 비밀번호(client secret) 대신 자기 키로 서명해 보내는 짧은 토큰입니다(private_key_jwt).
+> - **azp와 act**: `azp`는 토큰을 받은 Client, `act`는 사용자를 대신해 움직인 행위자입니다. 위임이 여러 번 이어지면 `act` 안에 `act`가 겹쳐 쌓여 경로 전체가 남습니다(토큰 교환, RFC 8693).
+
+## 실습 파일
+
+| 파일 | 역할 |
+|---|---|
+| `services.py` | 인가 서버, MCP A, MCP B와 Client 동작. MCP Server의 검사 수준은 `MODE`로 바뀜 |
+| `scenarios.json` | 호출 6건. 정상 1·2단계 호출과 공격이 섞여 있음 |
+| `lab.py` | 세 서비스를 띄우고 `scenarios.json`의 호출을 보낸 뒤 결과를 출력 |
+
+> 실습을 위해 단순화한 점: 모든 서명이 HMAC(HS256)이라 Client의 키를 등록부(`CLIENT_KEYS`)에 함께 둡니다. 실제로는 각 Client가 개인키를 혼자 갖고 공개키만 인가 서버에 등록하며, 호출받는 쪽도 공개키로 확인합니다. 사용자가 로그인해 토큰을 받는 과정(Authorization Code + PKCE)과 MCP의 연결 절차(initialize)도 생략했습니다.
+
+## 1단계. 토큰만 확인하는 MCP Server
+
+```bash
+# ~/ai-cloud-security-labs가 없다면 SETUP.md 5단계를 먼저 합니다
+cp -r ~/ai-cloud-security-labs/ch08-devsecops-image-gate/mcp-auth ~/mcp-auth-lab
+cd ~/mcp-auth-lab
+python3 lab.py bearer
+```
+
+```text
+MCP Server 검사 수준: bearer
+
+1 report-agent → A search_docs 실행     사내 문서 검색 실행됨(사용자: kim)
+  └ 김대리: 승인된 Agent가 A의 문서 검색 호출(정상, 1단계)
+2 report-agent → A crm_summary 실행     MCP B 응답 ▶ 고객 3명 조회. B가 확인한 경로: kim → (확인 안 함), scope=crm:read docs:read
+  └ 김대리: A가 다시 B를 부르는 고객 요약(정상, 2단계)
+3 shadow-agent → A search_docs 실행     사내 문서 검색 실행됨(사용자: kim)
+  └ 김대리: 인가 서버에 등록은 됐지만 A에는 승인되지 않은 Agent
+4 report-agent → A search_docs 실행     사내 문서 검색 실행됨(사용자: kim)
+  └ 공격자: report-agent의 토큰만 빼내 재사용(키는 없어 소유 증명을 못 만듦)
+5 report-agent → B crm_read    실행     고객 3명 조회. B가 확인한 경로: kim → (확인 안 함), scope=crm:read docs:read
+  └ 김대리: A용 토큰으로 B를 직접 호출
+6 report-agent → B crm_read    실행     고객 3명 조회. B가 확인한 경로: kim → (확인 안 함), scope=crm:read docs:read
+  └ 김대리: B용 토큰을 받아 A를 건너뛰고 B를 직접 호출
+```
+
+모든 호출이 실행되었습니다. 토큰은 모두 인가 서버가 서명한 진짜이고 범위도 맞기 때문입니다. 그런데 호출받는 쪽은 **김대리의 토큰이라는 것만 알고, 누가 그 토큰을 내밀었는지는 모릅니다.**
+
+- **3번**: 승인되지 않은 Agent도 A를 쓸 수 있습니다. 회사가 승인하지 않은 Agent 도구(Shadow AI)가 사용자의 토큰만 얻으면 사내 MCP Server를 마음대로 부를 수 있습니다.
+- **4번**: 토큰을 빼낸 공격자도 그대로 쓸 수 있습니다. Bearer 토큰은 가진 사람이 주인입니다.
+- **2번과 5번**: A는 받은 토큰을 B에 그대로 넘겼고, B는 A용 토큰(5번)도 받아 줬습니다. 토큰 하나가 A와 B 모두에서 통하므로 하나가 새면 둘 다 열립니다. B가 받은 범위에는 고객 조회와 상관없는 `docs:read`까지 들어 있습니다.
+- **6번**: Agent가 A를 건너뛰고 B를 바로 불렀습니다. A에 걸어 둔 통제(기록, 마스킹, 승인)를 모두 피해 갈 수 있습니다.
+- **B가 확인한 경로**: 모두 `kim → (확인 안 함)`입니다. 사고가 나도 B의 기록만으로는 어느 Agent가 어느 Server를 거쳐 왔는지 알 수 없습니다.
+
+## 2단계. 호출자까지 확인하는 MCP Server
+
+```bash
+python3 lab.py secure
+```
+
+```text
+MCP Server 검사 수준: secure
+
+1 report-agent → A search_docs 실행     사내 문서 검색 실행됨(사용자: kim)
+  └ 김대리: 승인된 Agent가 A의 문서 검색 호출(정상, 1단계)
+2 report-agent → A crm_summary 실행     MCP B 응답 ▶ 고객 3명 조회. B가 확인한 경로: kim → report-agent → docs-hub, scope=crm:read
+  └ 김대리: A가 다시 B를 부르는 고객 요약(정상, 2단계)
+3 shadow-agent → A search_docs 403 거부 이 Server에 승인되지 않은 Client: shadow-agent
+  └ 김대리: 인가 서버에 등록은 됐지만 A에는 승인되지 않은 Agent
+4 report-agent → A search_docs 401 거부 소유 증명 없음(토큰만 가진 쪽)
+  └ 공격자: report-agent의 토큰만 빼내 재사용(키는 없어 소유 증명을 못 만듦)
+5 report-agent → B crm_read    401 거부 이 Server용 토큰이 아님(aud=https://docs-hub.hanbit.example/mcp)
+  └ 김대리: A용 토큰으로 B를 직접 호출
+6 report-agent → B crm_read    403 거부 이 Server에 승인되지 않은 Client: report-agent
+  └ 김대리: B용 토큰을 받아 A를 건너뛰고 B를 직접 호출
+```
+
+`[표 실습8-8]` 검사 수준별 결과와 막은 확인
+
+| 호출 | bearer | secure | 막은 확인 |
+|---|---|---|---|
+| 3 승인되지 않은 Agent | 실행 | 403 | ③ 호출 Client(A의 승인 목록에 `shadow-agent` 없음) |
+| 4 빼낸 토큰 재사용 | 실행 | 401 | ② 소유 증명 |
+| 5 A용 토큰으로 B 호출 | 실행 | 401 | ① 대상 |
+| 6 A를 건너뛰고 B 호출 | 실행 | 403 | ③ 호출 Client(B는 `docs-hub`만 허용) |
+
+6번에 주목합니다. 토큰은 B용으로 정상 발급되었고 소유 증명도 맞습니다. 그래도 B는 "A를 거쳐서만 부를 수 있다"는 자기 규칙으로 막았습니다. **인가 서버가 토큰을 내줬다고 해서 호출받는 쪽이 판단을 넘겨서는 안 됩니다.** 어떤 Client를 받아 줄지는 각 Server가 정합니다.
+
+## 3단계. A가 B를 부를 때 무슨 일이 일어났나
+
+2번 호출에서 A는 받은 토큰①을 B에 넘기지 않고, 다음 순서로 B를 불렀습니다(`services.py`의 `crm_summary`).
+
+1. A는 자기 키로 client assertion을 만들어 "나는 `docs-hub`다"를 인가 서버에 증명합니다.
+2. 토큰①을 내고 "B용, `crm:read`만"이라고 토큰 교환을 요청합니다. 인가 서버는 토큰①이 정말 A에게 발급된 것인지 확인하고, 토큰①에 있던 범위 안에서만 내줍니다. 범위는 넓어질 수 없고 좁아지기만 합니다.
+3. 새 토큰②에 A의 소유 증명을 붙여 B를 부릅니다.
+
+토큰②의 내용은 다음과 같습니다.
+
+```json
+{
+  "sub": "kim",
+  "aud": "https://crm-mcp.hanbit.example/mcp",
+  "azp": "docs-hub",
+  "scope": "crm:read",
+  "act": {"sub": "docs-hub", "act": {"sub": "report-agent"}},
+  "cnf": {"kid": "docs-hub"}
+}
+```
+
+B는 이 토큰 하나로 "김대리를 대신해 `report-agent`가 시작했고, `docs-hub`가 지금 부르고 있다"는 경로 전체와, 쓸 수 있는 범위가 `crm:read`뿐이라는 것을 압니다. 출력의 `kim → report-agent → docs-hub`가 이것입니다. 위임이 한 번 더 이어지면 `act` 안에 한 겹이 더 쌓입니다. 5-3에서 말한 "위임할 때마다 권한을 좁히고, 위임의 연쇄 전체를 기록한다"를 토큰으로 구현한 것입니다.
+
+## 4단계. 직접 바꿔 보기
+
+1. `services.py`에서 `McpB`의 `allowed_clients`에 `"report-agent"`를 더하고 `secure`로 다시 실행합니다. 6번이 실행되면, B를 직접 부르는 길이 열린 것입니다. 실무에서 이 목록은 누가 승인해야 할까요?
+2. `crm_summary`의 교환 요청 범위 `"crm:read"`를 `"crm:read crm:write"`로 바꿔 봅니다. B가 확인한 scope가 어떻게 되나요? Agent가 처음 받은 토큰①에 `crm:write`가 없었기 때문에 교환으로도 얻을 수 없습니다.
+
+## 5단계. 확인한 것과 확인하지 못한 것
+
+| 항목 | 이 실습에서 | 실무에서 더 할 것 |
+|---|---|---|
+| Client 신원 증명 | 확인함: client assertion(키 서명) | 공개키 등록(private_key_jwt), 클라우드에서는 Workload Identity로 키 자체를 없앰(7-1) |
+| 토큰 도용 방지 | 확인함: 소유 증명(DPoP 흉내) | 서버 사이는 mTLS 인증서 바인딩, 서비스 메시(SPIFFE)도 선택지 |
+| 호출 Client 승인 | 확인함: Server별 승인 목록 | 승인 목록을 사내 레지스트리·MCP Gateway에서 한곳에 관리(5-3, 7-4) |
+| 다단계 위임 | 확인함: 토큰 교환, 범위 축소, `act` 경로 | 위임 깊이 상한, 경로에 승인되지 않은 Client가 끼면 거부 |
+| 사용자 로그인 | 확인하지 않음 | Authorization Code + PKCE, MCP Client 등록 방식(사전 등록, Client ID 메타데이터 문서) |
+| 기록 | 확인하지 않음 | `act` 경로와 Trace ID를 함께 남김(9장 실습 2) |
+
+이 실습은 원격(HTTP) MCP Server의 경우입니다. 내 PC에서 실행되는 로컬(stdio) MCP Server는 네트워크 인증을 거치지 않고 사용자 권한으로 바로 실행되므로, 5장 실습 1처럼 접근 범위를 좁히고 API Key 같은 자격증명은 설정 파일에 그대로 적지 않고 OS의 키 저장소나 환경변수로 넘깁니다.
+
+## 정리
+
+```bash
+cd ~ && rm -rf ~/mcp-auth-lab
+```
+
+## 체크포인트
+
+- [ ] `bearer`에서 토큰이 모두 진짜였는데도 막아야 했던 호출은 무엇이었고, 각각 무엇을 확인해야 막을 수 있었나요?
+- [ ] 6번처럼 B용으로 정상 발급된 토큰을 B가 거부한 이유를 설명할 수 있나요?
+- [ ] A가 받은 토큰을 B에 그대로 넘기는 것과 토큰 교환을 하는 것은, B가 아는 정보와 받는 권한에서 어떻게 다른가요?
+- [ ] 여러분 회사의 MCP Server는 "누가 부르는지"를 사용자 단위로만 보나요, Client(Agent·MCP) 단위로도 보나요?

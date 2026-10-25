@@ -42,7 +42,8 @@ done
 if command -v trivy >/dev/null; then
   for d in /opt /srv /usr/local /var/www; do
     [ -d "$d" ] || continue                       # 없는 폴더는 건너뛴다
-    trivy rootfs --quiet --list-all-pkgs --format json -o "$TMP/sbom-$(basename "$d").json" "$d" >/dev/null 2>&1
+    # 결과 파일 이름에 스캔한 폴더를 '/' 대신 '_'로 적는다 (예: /usr/local → sbom-usr_local.json)
+    trivy rootfs --quiet --list-all-pkgs --format json -o "$TMP/sbom-$(echo "${d#/}" | tr / _).json" "$d" >/dev/null 2>&1
   done
 fi
 
@@ -69,14 +70,17 @@ for f in glob.glob(os.path.join(tmp, "sbom-*.json")):
             pk.append({"name": p["Name"], "version": p.get("Version") or "확인 필요", "source": "sbom-" + r.get("Type", ""),
                        "path": p.get("FilePath") or r.get("Target", "")})
 # SBOM으로 버전이 확인된 설치 폴더(예: /opt/tomcat) 안의 실행 파일은 그 SW의 일부이므로 따로 세지 않는다
+# 단, bin·lib처럼 여러 SW가 함께 쓰는 공용 폴더는 설치 폴더로 보지 않는다
+# (/usr/local/bin을 설치 폴더로 보면 그곳에 직접 복사한 실행 파일이 모두 목록에서 빠진다)
+SHARED = {"bin", "sbin", "lib", "lib64", "libexec", "share", "include", "etc"}
 roots = set()
 for f in glob.glob(os.path.join(tmp, "sbom-*.json")):
-    base = "/" + os.path.basename(f)[5:-5]          # 파일 이름 sbom-opt.json → 스캔한 폴더 /opt
+    base = "/" + os.path.basename(f)[5:-5].replace("_", "/")   # 파일 이름 sbom-usr_local.json → 스캔한 폴더 /usr/local
     for r in json.load(open(f)).get("Results", []):
         for p in r.get("Packages") or []:
-            fp = p.get("FilePath") or ""
-            if fp:
-                roots.add(os.path.join(base, fp.split("/")[0]))   # 예: /opt + tomcat/lib/... → /opt/tomcat
+            top = (p.get("FilePath") or "").split("/")[0]
+            if top and top not in SHARED:
+                roots.add(os.path.join(base, top))   # 예: /opt + tomcat/lib/... → /opt/tomcat
 pk = [p for p in pk if not (p["source"] == "manual" and any(p["path"].startswith(r + "/") for r in roots))]
 cont = open(os.path.join(tmp, "containers.txt")).read().split() if os.path.exists(os.path.join(tmp, "containers.txt")) else []
 up = [{"name": a[0], "candidate": a[1], "repo": a[2]} for a in tsv("upgradable.tsv")]

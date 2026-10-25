@@ -1,0 +1,14 @@
+[
+  {"who": "김대리", "client": "report-agent", "target": "A", "tool": "search_docs", "aud": "A",
+   "note": "승인된 Agent가 A의 문서 검색 호출(정상, 1단계)"},
+  {"who": "김대리", "client": "report-agent", "target": "A", "tool": "crm_summary", "aud": "A",
+   "note": "A가 다시 B를 부르는 고객 요약(정상, 2단계)"},
+  {"who": "김대리", "client": "shadow-agent", "target": "A", "tool": "search_docs", "aud": "A",
+   "note": "인가 서버에 등록은 됐지만 A에는 승인되지 않은 Agent"},
+  {"who": "공격자", "client": "report-agent", "target": "A", "tool": "search_docs", "aud": "A", "prove": false,
+   "note": "report-agent의 토큰만 빼내 재사용(키는 없어 소유 증명을 못 만듦)"},
+  {"who": "김대리", "client": "report-agent", "target": "B", "tool": "crm_read", "aud": "A",
+   "note": "A용 토큰으로 B를 직접 호출"},
+  {"who": "김대리", "client": "report-agent", "target": "B", "tool": "crm_read", "aud": "B",
+   "note": "B용 토큰을 받아 A를 건너뛰고 B를 직접 호출"}
+]
