@@ -1,4 +1,4 @@
-# AI 자산 등록 정책 (10-2의 표 10-5 위험 등급, 표 10-6 책임, 10-3 허용 목록)
+# AI 자산 등록 정책 (10-2의 표 10-5 위험 등급, 10-2 책임 조직, 10-3 허용 목록)
 # 위반 메시지는 "자산 ID [분류] 이름: 내용" 형식입니다.
 #
 # 읽는 데이터: data.assets(등록된 AI 자산), data.mcp_servers(승인 MCP 목록) — registry/ai-assets.yaml
@@ -61,7 +61,7 @@ control(a, k) := v if {
 	v != ""
 } else := "없음"
 
-# 1. 책임: 소유 부서와 최종 책임자(A) 한 명 (표 10-6)
+# 1. 책임: 소유 부서와 최종 책임자(A) 한 명 (10-2의 책임 조직)
 owner_label := {"owner_dept": "소유 부서", "accountable": "최종 책임자(A)"}
 
 deny contains msg if {

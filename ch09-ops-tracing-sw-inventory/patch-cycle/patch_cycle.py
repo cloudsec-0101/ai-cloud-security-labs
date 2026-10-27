@@ -1,4 +1,4 @@
-"""patch_cycle.py — 패치 → 확인 → 롤백, 그리고 Workaround를 하나의 순환으로 관리한다 (9장 실습 4)
+"""patch_cycle.py — 패치 → 확인 → 롤백, 그리고 Workaround를 하나의 순환으로 관리한다 (9장 실습 3)
 
 사용법:
   python3 patch_cycle.py status                        서버별 실행 버전·헬스·취약 여부, 외부 경로, 티켓, Workaround

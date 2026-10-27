@@ -1,15 +1,9 @@
-# 9장. AI 서비스 운영 보안 — SW 버전 자동 수집, Trace ID와 로그 마스킹, 클라우드 지원 종료 대조, 패치·확인·Workaround
+# 9장. AI 서비스 운영 보안 — SW 버전 자동 수집, Trace ID와 로그 마스킹, 패치·확인·Workaround
 
 > 책 『AI 보안, 클라우드에서 시작한다』 9장 [실습]의 코드와 단계별 안내입니다.
 
 ## 이 폴더의 파일
 
-- `cloud-eol/collect_aws.sh`
-- `cloud-eol/eol_check.py`
-- `cloud-eol/sample/eks.json`
-- `cloud-eol/sample/elasticache.json`
-- `cloud-eol/sample/lambda.json`
-- `cloud-eol/sample/rds.json`
 - `patch-cycle/advisory.json`
 - `patch-cycle/app/Dockerfile`
 - `patch-cycle/app/app.py`
@@ -25,8 +19,7 @@
 - `trace/trace_app.py`
 - `ch09_lab1_sw_inventory.ipynb`: 실습 1을 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함, 출력 없음). 실행 결과가 저장된 버전은 `ch09_lab1_sw_inventory_executed.ipynb`
 - `ch09_lab2_trace_id_masking.ipynb`: 실습 2를 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함, 출력 없음). 실행 결과가 저장된 버전은 `ch09_lab2_trace_id_masking_executed.ipynb`
-- `ch09_lab3_cloud_eol_check.ipynb`: 실습 3을 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함, 출력 없음). 실행 결과가 저장된 버전은 `ch09_lab3_cloud_eol_check_executed.ipynb`
-- `ch09_lab4_patch_verify_workaround.ipynb`: 실습 4를 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함, 출력 없음). 실행 결과가 저장된 버전은 `ch09_lab4_patch_verify_workaround_executed.ipynb`
+- `ch09_lab3_patch_verify_workaround.ipynb`: 실습 3을 Jupyter 노트북에서 셀 단위로 실행하는 버전(과제 포함, 출력 없음). 실행 결과가 저장된 버전은 `ch09_lab3_patch_verify_workaround_executed.ipynb`
 
 ---
 
@@ -392,164 +385,7 @@ rm -rf ~/trace-lab ~/trace-venv
 
 ---
 
-# 실습 3. 클라우드 관리형 서비스의 지원 종료 버전 자동으로 찾기
-
-> 9장 [실습] 3번의 단계별 안내입니다. 관리형 DB, 쿠버네티스, 서버리스, 캐시의 버전 조회 결과를 공개된 지원 종료 일정과 자동으로 대조해, 이미 지원이 끝난 것과 곧 끝나는 것, 자동 마이너 업그레이드가 꺼진 것을 찾습니다. 예시 조회 결과로 진행하므로 클라우드 계정과 API Key가 필요 없고, 계정이 있다면 같은 스크립트를 자기 계정의 조회 결과에 쓸 수 있습니다. 소요 시간은 30분입니다.
-> Python 3만 있으면 되고 외부 패키지가 필요 없습니다. 지원 종료 일정은 endoflife.date의 공개 API에서 받으므로 인터넷 연결이 필요합니다. 아래 결과는 2026년 10월 20일 WSL2의 Ubuntu 24.04, Python 3.12에서 실행한 것입니다.
-
-## 실습 시나리오
-
-9-1과 9-3에서 본 것처럼 관리형 서비스도 버전이 있고, 그 버전의 지원 종료는 고객이 챙겨야 합니다. 공급자는 지원이 끝난 버전을 강제로 올리거나(서비스 중단 위험), 연장 지원 비용을 청구하거나, 보안 패치를 더는 내지 않습니다. 그런데 서비스마다 지원 일정 문서가 따로 있어서 사람이 하나씩 찾아 대조하면 금방 밀립니다. 9-4의 자동 패치 순환처럼 **"현황 수집 → 외부 정보와 대조 → 조치 대상 생성"**을 스크립트로 만들어 봅니다.
-
-> 🔎 (용어 풀이)
-> - **메이저·마이너 버전**: `14.15`에서 앞의 `14`가 메이저, 뒤의 `15`가 마이너 버전입니다. 마이너 업그레이드는 버그·보안 수정이 중심이라 대부분 그대로 호환되고, 메이저 업그레이드는 기능이 바뀌어 호환성 시험이 필요합니다.
-> - **자동 마이너 업그레이드**: 관리형 DB 같은 서비스에서 켜 두면, 공급자가 정해진 점검 시간에 마이너 버전을 알아서 올려 주는 설정입니다.
-> - **지원 종료(EOL, End of Life)**: 공급자가 그 버전에 보안 패치를 더 내지 않는 시점입니다. 9장 본문의 EOS(End of Support)와 같은 뜻으로 씁니다.
-
-## 실습 파일
-
-| 파일 | 역할 |
-|---|---|
-| `sample/` | 가상 회사의 AWS 조회 결과 예시. AWS CLI가 내는 JSON 형식 그대로이며, 필요한 필드만 남겼음 |
-| `eol_check.py` | 조회 결과를 읽어 서비스·버전별 지원 종료일을 endoflife.date에서 받아 대조하고 판정. 긴급·위험이 있으면 종료 코드 1 |
-| `collect_aws.sh` | (선택) 자기 AWS 계정에서 같은 형식의 조회 결과를 만드는 스크립트. 조회(describe, list)만 함 |
-
-`sample/` 폴더의 네 파일은 다음 명령의 출력과 같은 형식입니다.
-
-| 파일 | 만든 명령 | 판정에 쓰는 값 |
-|---|---|---|
-| `rds.json` | `aws rds describe-db-instances` | 엔진, 엔진 버전, 자동 마이너 업그레이드 |
-| `elasticache.json` | `aws elasticache describe-cache-clusters` | 엔진, 엔진 버전, 자동 마이너 업그레이드 |
-| `eks.json` | `aws eks describe-cluster --name <클러스터>` (클러스터마다) | 클러스터 버전 |
-| `lambda.json` | `aws lambda list-functions` | 함수별 런타임 |
-
-## 1단계. 지원 종료 일정을 API로 확인해 보기
-
-```bash
-# ~/ai-cloud-security-labs가 없다면 SETUP.md 5단계를 먼저 합니다
-cp -r ~/ai-cloud-security-labs/ch09-ops-tracing-sw-inventory/cloud-eol ~/eol-lab
-cd ~/eol-lab
-curl -s https://endoflife.date/api/amazon-eks.json | python3 -m json.tool | head -9
-```
-
-```text
-[
-    {
-        "cycle": "1.37",
-        "releaseDate": "2026-10-01",
-        "eol": "2027-12-01",
-        "latest": "1.37-eks-4",
-        "latestReleaseDate": "2026-10-01",
-        "lts": false,
-        "extendedSupport": "2028-12-01"
-```
-
-endoflife.date는 480여 개 제품(2026년 10월 기준)의 버전별 출시일과 지원 종료일을 모아 공개하는 오픈소스 프로젝트이고, 공급자의 공식 문서를 출처로 합니다. 버전 구간(`cycle`)마다 표준 지원 종료일(`eol`)과 연장 지원 종료일(`extendedSupport`)이 있습니다. 서비스에 따라 필드의 뜻이 조금 다르므로 `eol_check.py`는 다음처럼 읽습니다.
-
-`[표 실습9-2]` 서비스별 지원 종료일을 읽는 방법
-
-| 서비스 (API 제품 이름) | 보안 패치가 끝나는 날로 쓰는 값 | 그 뒤 |
-|---|---|---|
-| EKS (`amazon-eks`) | `eol`: 표준 지원 종료 | `extendedSupport`까지 추가 비용을 내고 연장 지원 |
-| RDS PostgreSQL (`amazon-rds-postgresql`) | `eol`: 메이저 버전 표준 지원 종료 | `extendedSupport`까지 추가 비용을 내고 연장 지원 |
-| RDS MySQL (`amazon-rds-mysql`) | `support`: 이 마이너 버전의 지원 종료 (메이저 버전보다 먼저 끝남) | 마이너 업그레이드로 해결 |
-| Lambda (`aws-lambda`) | `support`: 런타임 지원 중단, 보안 패치 끝 | `eol`부터 함수 수정까지 막힘 |
-| ElastiCache Redis (`amazon-elasticache-redis`) | `eol`: 표준 지원 종료 | `extendedSupport`까지 연장 지원 |
-
-> endoflife.date는 커뮤니티가 관리하는 정보입니다. 판정 결과로 실제 조치를 정하기 전에는 공급자의 공식 문서("Amazon EKS Kubernetes release calendar", "Lambda runtimes deprecation" 등)와 AWS Health 대시보드의 알림으로 한 번 더 확인합니다.
-
-## 2단계. 자동 대조 실행
-
-```bash
-python3 eol_check.py sample; echo "종료 코드: $?"
-```
-
-![화면 9-5](../docs/images/화면9-5_클라우드_지원종료_자동대조.png)
-
-*[화면 9-5] 클라우드 관리형 서비스 지원 종료 자동 대조*
-
-`[표 실습9-3]` 예시 회사의 판정 결과
-
-| 리소스 | 서비스 | 버전 | 지원 종료일 | 남은 일수 | 자동 마이너 | 판정 |
-|---|---|---|---|---|---|---|
-| order-db | RDS PostgreSQL | 13.20 | 2026-02-28 | -234 | 꺼짐 | **긴급** |
-| prod-cluster | EKS | 1.33 | 2026-07-29 | -83 | - | **긴급** |
-| resize-image | Lambda | python3.9 | 2025-12-15 | -309 | - | **긴급** |
-| billing-db | RDS MySQL | 8.4.7 | 2026-11-30 | 41 | 꺼짐 | **위험** |
-| chatbot-api | Lambda | python3.10 | 2026-10-31 | 11 | - | **위험** |
-| ml-cluster | EKS | 1.35 | 2027-03-27 | 158 | - | **위험** |
-| session-cache | ElastiCache Redis | 6.2.6 | 2027-01-31 | 103 | 켜짐 | **위험** |
-| rag-indexer | Lambda | (컨테이너 이미지) | - | - | - | 확인 필요 |
-| notify-order | Lambda | nodejs22.x | 2027-04-30 | 192 | - | 양호 |
-| rate-limit | ElastiCache Redis | 7.1.0 | - | - | 켜짐 | 양호 |
-| report-db | RDS PostgreSQL | 16.9 | 2029-02-28 | 862 | 켜짐 | 양호 |
-
-11개 가운데 7개가 긴급 또는 위험이고, 종료 코드 1이 나왔습니다.
-
-## 3단계. 결과 읽기
-
-- **"관리형"인데 지원이 이미 끝난 것이 세 개입니다.** order-db(PostgreSQL 13), prod-cluster(EKS 1.33), resize-image(python3.9)는 표준 지원이 끝났습니다. RDS와 EKS는 서비스가 멈추지는 않지만, 그 대신 연장 지원 비용이 자동으로 청구되고 있을 수 있습니다. 비용 청구서에서 "Extended Support" 항목을 찾아보면 지원 종료를 놓친 리소스가 드러나기도 합니다.
-- **Lambda 런타임은 지원이 끝나도 함수가 계속 돕니다.** resize-image는 2025년 12월에 보안 패치가 끊겼지만 2027년 8월까지는 수정까지 됩니다. 아무도 알아채지 못하는 사이 패치 없는 런타임이 계속 운영되는 구조입니다. 3년 전에 마지막으로 고친 함수(`LastModified`)일수록 이런 경우가 많습니다.
-- **같은 "8.4"라도 마이너 버전마다 지원 종료일이 다릅니다.** billing-db는 메이저 버전 8.4가 2029년까지 지원되지만 8.4.7은 41일 뒤에 끝납니다. 자동 마이너 업그레이드가 켜져 있었다면 저절로 해결되었을 일입니다.
-- **컨테이너 이미지로 배포한 함수는 이 방법으로 볼 수 없습니다.** rag-indexer처럼 이미지로 배포한 Lambda는 런타임 정보가 없습니다. 이미지 안의 OS와 런타임은 8장 실습 1처럼 이미지를 스캔해야 보입니다.
-- **EKS는 클러스터 버전만 본 것입니다.** 공급자가 컨트롤 플레인을 관리하더라도, 업그레이드 시점과 워커 노드, 애드온은 고객 몫입니다(표 9-5).
-
-> 🔎 (용어 풀이) 쿠버네티스 클러스터는 두 부분으로 나뉩니다. **컨트롤 플레인**은 클러스터 전체를 관리하는 두뇌(API Server 등)로 EKS에서는 AWS가 운영하고, **워커 노드**는 실제 컨테이너가 도는 서버로 고객이 관리합니다. **애드온**은 네트워크, DNS 같은 클러스터의 부가 기능입니다. 컨트롤 플레인 버전을 올려도 워커 노드와 애드온은 따로 올려야 합니다.
-
-판정 기준(180일)은 `--days`로 바꿀 수 있습니다. 메이저 업그레이드는 호환성 시험까지 몇 달이 걸리므로, 6개월 전에는 계획이 시작되어야 합니다.
-
-## 4단계. 매주 자동으로 돌게 만들기
-
-`eol_check.py`는 긴급·위험이 있으면 종료 코드 1을 돌려줍니다. 실습 1처럼 예약 작업으로 등록하면, 사람이 기억하지 않아도 매주 대조가 돌고 결과가 패치 큐로 넘어갑니다.
-
-```bash
-# 매주 월요일 08:00: 조회 → 대조 → 조치가 필요하면 결과를 패치 큐(예: 티켓 시스템 수신 메일)로 보냄
-0 8 * * 1 cd /opt/cloud-eol && ./collect_aws.sh weekly && python3 eol_check.py weekly > eol.txt || mail -s "지원 종료 점검: 조치 필요" patch-queue@example.com < eol.txt
-```
-
-이 흐름이 9-4 자동 패치 순환의 ①(외부 정보 수집)·②(자산 대조)·③(조치 작업 생성) 단계입니다. 실무에서는 결과를 티켓 시스템 API로 바로 등록하고, 리소스의 담당 팀 태그를 읽어 담당자를 자동으로 지정합니다.
-
-## 5단계. (선택) 내 AWS 계정으로 해 보기
-
-AWS 계정이 있다면 **읽기 전용 권한**(예: AWS 관리형 정책 `ReadOnlyAccess`)으로 조회 결과를 만들어 같은 스크립트에 넣습니다. 조직 계정이라면 보안팀에 읽기 전용 역할을 요청합니다. `collect_aws.sh`는 조회(describe, list)만 합니다.
-
-```bash
-chmod +x collect_aws.sh
-./collect_aws.sh my-account ap-northeast-2     # 리전마다 실행
-python3 eol_check.py my-account
-```
-
-> 조회는 **지정한 리전**만 합니다. 잊힌 리전에 오래된 리소스가 남아 있는 경우가 많으니, 쓰는 리전을 모두 확인합니다. 이 스크립트는 이 책의 예시 데이터로만 실행해 보았습니다. 자기 계정에서는 결과를 콘솔과 한 번 대조해 봅니다.
-
-Azure와 GCP도 같은 방식으로 할 수 있습니다. 아래 명령으로 버전을 조회하고, endoflife.date의 `azure-kubernetes-service`, `google-kubernetes-engine` 같은 제품으로 대조합니다.
-
-```bash
-# Azure: App Service·Functions 런타임, AKS 버전
-az webapp list --query "[].{name:name, runtime:siteConfig.linuxFxVersion}" -o table
-az aks list --query "[].{name:name, version:kubernetesVersion}" -o table
-
-# GCP: Cloud Functions 런타임, GKE 버전, Cloud SQL 버전
-gcloud functions list --format="table(name,runtime)"
-gcloud container clusters list --format="table(name,currentMasterVersion)"
-gcloud sql instances list --format="table(name,databaseVersion)"
-```
-
-## 정리
-
-```bash
-cd ~ && rm -rf ~/eol-lab
-```
-
-## 체크포인트
-
-- [ ] "관리형 서비스니까 공급자가 알아서 패치한다"고 생각했던 부분 중, 실제로는 고객 몫인 것은 무엇이었나요?
-- [ ] 지원이 끝났는데도 서비스가 계속 돌아가는 경우(연장 지원, Lambda 런타임)는 왜 더 위험할까요?
-- [ ] 자동 마이너 업그레이드를 켜 두면 해결되는 항목과, 사람이 계획해야 하는 항목(메이저 업그레이드)을 구분할 수 있나요?
-- [ ] 이 대조를 매주 자동으로 돌리려면, 실습 1의 서버 현황 수집과 무엇을 합쳐야 회사 전체를 볼 수 있을까요?
-
----
-
-# 실습 4. 패치를 자동으로 배포하고, 결과를 확인하고, 패치 전에는 Workaround로 막기
+# 실습 3. 패치를 자동으로 배포하고, 결과를 확인하고, 패치 전에는 Workaround로 막기
 
 > 9장 [실습] 4번의 단계별 안내입니다. 서버 3대로 이루어진 작은 서비스에 보안 공지가 들어온 상황에서, 9-4의 세 가지 질문을 직접 해 봅니다. 패치 전 Workaround를 적용하고 그 효과를 확인하는가, 패치를 자동으로 배포하고 문제가 생기면 자동으로 되돌리는가, "패치 완료" 보고가 아니라 다시 점검한 결과로 조치를 확인하는가입니다. 소요 시간은 30~40분입니다.
 > 먼저 [SETUP.md](../SETUP.md)의 1~5단계(WSL2·Docker 설치와 저장소 내려받기)를 마칩니다. API Key는 필요 없습니다. 아래 결과는 2026년 10월 20일 WSL2의 Ubuntu 24.04, Docker 29.1, Python 3.12에서 실행한 것입니다.
@@ -562,7 +398,7 @@ cd ~ && rm -rf ~/eol-lab
 
 ## 실습 파일
 
-`[표 실습9-4]` 실습 4의 구성
+`[표 실습9-2]` 실습 3의 구성
 
 | 파일 | 역할 |
 |---|---|
@@ -718,9 +554,9 @@ python3 patch_cycle.py report
   해제되지 않은 Workaround: 0건, 그중 기한이 지난 것: 0건
 ```
 
-`[표 실습9-5]` 실습 결과와 9장 지표의 연결
+`[표 실습9-3]` 실습 결과와 9장 지표의 연결
 
-| 실습 결과 | 9장 지표 (표 9-16) | 실무에서 보는 방법 |
+| 실습 결과 | 9장 지표 (표 9-13) | 실무에서 보는 방법 |
 |---|---|---|
 | 공지 → Workaround 적용·효과 확인 | Workaround 적용 시간 | 시간 단위 이내가 목표 |
 | 공지 → 조치 확인 완료 | KEV 취약점 평균 조치 시간 | "작업 완료"가 아니라 "확인 완료" 시각으로 계산 |

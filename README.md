@@ -20,7 +20,7 @@
 | 6장 | [ch06-aiaas-vendor-evaluation](./ch06-aiaas-vendor-evaluation) | AIaaS의 이해와 환경별 보안 — 약관 검토, 가명처리 검문소, 공급자 전환 리허설 | 10 |
 | 7장 | [ch07-zero-trust-lab](./ch07-zero-trust-lab) | 제로트러스트 기반 AI Cloud 보안 아키텍처 — 4계층 점검표, 미니 제로트러스트 랩, RAG 문서 권한 | 13 |
 | 8장 | [ch08-devsecops-image-gate](./ch08-devsecops-image-gate) | AI 서비스 개발 보안 — 이미지 CVE 게이트, Jailbreak 성공률, Agent Tool 호출 검증, MCP 간 호출 인증 | 15 |
-| 9장 | [ch09-ops-tracing-sw-inventory](./ch09-ops-tracing-sw-inventory) | AI 서비스 운영 보안 — SW 버전 자동 수집, Trace ID와 로그 마스킹, 클라우드 지원 종료 대조, 패치·확인·Workaround | 19 |
+| 9장 | [ch09-ops-tracing-sw-inventory](./ch09-ops-tracing-sw-inventory) | AI 서비스 운영 보안 — SW 버전 자동 수집, Trace ID와 로그 마스킹, 패치·확인·Workaround | 19 |
 | 10장 | [ch10-policy-as-code-shadow-ai](./ch10-policy-as-code-shadow-ai) | AI 시대 기업 보안 체계와 전환 로드맵 — 정책을 코드로 집행하기, Shadow AI 발견 | 11 |
 
 ## Jupyter 노트북
@@ -47,8 +47,7 @@
 | 8장 | [ch08_lab3_agent_tool_guard.ipynb](./ch08-devsecops-image-gate/ch08_lab3_agent_tool_guard.ipynb) | [ch08_lab3_agent_tool_guard_executed.ipynb](./ch08-devsecops-image-gate/ch08_lab3_agent_tool_guard_executed.ipynb) |
 | 9장 | [ch09_lab1_sw_inventory.ipynb](./ch09-ops-tracing-sw-inventory/ch09_lab1_sw_inventory.ipynb) | [ch09_lab1_sw_inventory_executed.ipynb](./ch09-ops-tracing-sw-inventory/ch09_lab1_sw_inventory_executed.ipynb) |
 | 9장 | [ch09_lab2_trace_id_masking.ipynb](./ch09-ops-tracing-sw-inventory/ch09_lab2_trace_id_masking.ipynb) | [ch09_lab2_trace_id_masking_executed.ipynb](./ch09-ops-tracing-sw-inventory/ch09_lab2_trace_id_masking_executed.ipynb) |
-| 9장 | [ch09_lab3_cloud_eol_check.ipynb](./ch09-ops-tracing-sw-inventory/ch09_lab3_cloud_eol_check.ipynb) | [ch09_lab3_cloud_eol_check_executed.ipynb](./ch09-ops-tracing-sw-inventory/ch09_lab3_cloud_eol_check_executed.ipynb) |
-| 9장 | [ch09_lab4_patch_verify_workaround.ipynb](./ch09-ops-tracing-sw-inventory/ch09_lab4_patch_verify_workaround.ipynb) | [ch09_lab4_patch_verify_workaround_executed.ipynb](./ch09-ops-tracing-sw-inventory/ch09_lab4_patch_verify_workaround_executed.ipynb) |
+| 9장 | [ch09_lab3_patch_verify_workaround.ipynb](./ch09-ops-tracing-sw-inventory/ch09_lab3_patch_verify_workaround.ipynb) | [ch09_lab3_patch_verify_workaround_executed.ipynb](./ch09-ops-tracing-sw-inventory/ch09_lab3_patch_verify_workaround_executed.ipynb) |
 | 10장 | [ch10_lab1_policy_as_code.ipynb](./ch10-policy-as-code-shadow-ai/ch10_lab1_policy_as_code.ipynb) | [ch10_lab1_policy_as_code_executed.ipynb](./ch10-policy-as-code-shadow-ai/ch10_lab1_policy_as_code_executed.ipynb) |
 | 10장 | [ch10_lab2_shadow_ai.ipynb](./ch10-policy-as-code-shadow-ai/ch10_lab2_shadow_ai.ipynb) | [ch10_lab2_shadow_ai_executed.ipynb](./ch10-policy-as-code-shadow-ai/ch10_lab2_shadow_ai_executed.ipynb) |
 

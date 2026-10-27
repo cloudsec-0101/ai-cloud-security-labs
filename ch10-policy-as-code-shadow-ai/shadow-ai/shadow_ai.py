@@ -210,7 +210,7 @@ def main():
         mark = "" if f["status"] == "승인" else ("  ◀ " + f["priority"])
         print(f"  {pad(f['status'], 24)} {pad(f['what'], 40)} {pad(f['dept'], 22)} {who}{f['reqs']}건{size}{mark}")
     shadow = [f for f in found if f["status"] != "승인"]
-    print(f"\n허용 목록 밖 사용 {len(shadow)}건 (우선 {sum(f['priority'] == '우선' for f in shadow)}건) — 표 10-12 '미등록 AI·Agent 발견 건수'")
+    print(f"\n허용 목록 밖 사용 {len(shadow)}건 (우선 {sum(f['priority'] == '우선' for f in shadow)}건) — 표 10-11 '미등록 AI·Agent 발견 건수'")
 
     # 보고서: 허용 목록 밖 사용만 표로 정리한다 (담당자가 처리 결정 칸을 채워 이력으로 남긴다)
     os.makedirs(os.path.join(HERE, "out"), exist_ok=True)
