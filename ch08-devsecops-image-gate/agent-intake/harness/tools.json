@@ -1,0 +1,5 @@
+{
+  "skills": ["meeting-notes"],
+  "mcp_servers": ["weather"],
+  "builtin_tools": ["read_file", "write_file", "send_mail"]
+}

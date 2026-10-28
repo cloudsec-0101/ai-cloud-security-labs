@@ -1,15 +1,19 @@
 {
   "task": "회의록 요약 후 팀장에게 보내기",
-  "allowed_tools": ["read_file", "write_file", "send_mail"],
+  "allowed_tools": ["read_file", "write_file", "send_mail", "remember"],
   "tools": {
     "read_file":  {"risk": "낮음", "args": {"path": "str"}},
     "write_file": {"risk": "중간", "args": {"path": "str", "content": "str"}},
     "send_mail":  {"risk": "중간", "args": {"to": "list", "subject": "str", "body": "str"}},
+    "remember":   {"risk": "중간", "args": {"note": "str"}},
     "delete_file":{"risk": "높음", "args": {"path": "str"}},
     "db_query":   {"risk": "중간", "args": {"sql": "str"}}
   },
   "workspace": "workspace/",
   "mail_domain": "hanbit.example",
   "approval_needed": {"send_mail_recipients_over": 5},
-  "limits": {"max_calls": 12, "max_same_call": 3}
+  "limits": {"max_calls": 12, "max_same_call": 3},
+  "memory": {
+    "deny_patterns": ["@(?!hanbit\\.example)[\\w.-]+\\.\\w+", "https?://", "(?i)(password|secret|token|api[_-]?key)", "(앞으로|항상|모든 메일)"]
+  }
 }

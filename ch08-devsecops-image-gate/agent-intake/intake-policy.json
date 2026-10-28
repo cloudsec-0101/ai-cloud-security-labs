@@ -1,0 +1,8 @@
+{
+  "approved_sources": ["registry.hanbit.example/", "skills.hanbit.example/"],
+  "skill_allowed_tools": ["Read", "Write", "Grep", "Glob"],
+  "network_allowlist": ["api.weather.example"],
+  "file_allowlist": ["workspace/"],
+  "env_allowlist": ["WEATHER_API_KEY"],
+  "harness_files": ["harness/AGENTS.md", "harness/tools.json"]
+}
