@@ -75,7 +75,7 @@ def check(c):
     # 1) 출처: 사내 레지스트리에 등록된 것만 (본문 "승인된 출처에서만")
     if not any(c["source"].startswith(s) for s in POLICY["approved_sources"]):
         found.append(("차단", f"승인되지 않은 출처: {c['source']}"))
-    # 2) 모델에게 보이는 글에 숨은 지시문 (표 8-9 Tool Poisoning)
+    # 2) 모델에게 보이는 글에 숨은 지시문 (표 8-8 Tool Poisoning)
     if INVISIBLE.search(c["prompt"]):
         found.append(("차단", "보이지 않는 유니코드 문자"))
     for comment in re.findall(r"<!--(.*?)-->", c["prompt"], re.S):
